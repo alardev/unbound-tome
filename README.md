@@ -4,10 +4,10 @@
 
 Axum
 Axum-login
-SurrealDB
+SQLx w/ Postgres
 Tailwind
 HTMX
-minijinja
+askama
 
 ## Planned Features
 
