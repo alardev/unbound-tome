@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
-use axum_login::{AuthUser, AuthnBackend, UserId};
+use axum_login::{tracing::{debug, error}, AuthUser, AuthnBackend, UserId};
 use oauth2::{
     basic::{BasicClient, BasicRequestTokenError},
     reqwest::{async_http_client, AsyncHttpClientError},
@@ -9,12 +9,12 @@ use oauth2::{
 };
 use password_auth::verify_password;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, SqlitePool};
+use sqlx::{FromRow, PgPool, types::Uuid};
 use tokio::task;
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
-pub struct User {
-    id: i64,
+pub struct Appuser {
+    appuser_id: Uuid,
     pub username: String,
     pub password: Option<String>,
     pub access_token: Option<String>,
@@ -22,10 +22,10 @@ pub struct User {
 
 // Here we've implemented `Debug` manually to avoid accidentally logging the
 // access token.
-impl std::fmt::Debug for User {
+impl std::fmt::Debug for Appuser {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("User")
-            .field("id", &self.id)
+            .field("id", &self.appuser_id)
             .field("username", &self.username)
             .field("password", &"[redacted]")
             .field("access_token", &"[redacted]")
@@ -33,11 +33,11 @@ impl std::fmt::Debug for User {
     }
 }
 
-impl AuthUser for User {
-    type Id = i64;
+impl AuthUser for Appuser {
+    type Id = Uuid;
 
     fn id(&self) -> Self::Id {
-        self.id
+        self.appuser_id
     }
 
     fn session_auth_hash(&self) -> &[u8] {
@@ -95,12 +95,12 @@ pub enum BackendError {
 
 #[derive(Debug, Clone)]
 pub struct Backend {
-    db: SqlitePool,
+    db: PgPool,
     client: BasicClient,
 }
 
 impl Backend {
-    pub fn new(db: SqlitePool, client: BasicClient) -> Self {
+    pub fn new(db: PgPool, client: BasicClient) -> Self {
         Self { db, client }
     }
 
@@ -111,7 +111,7 @@ impl Backend {
 
 #[async_trait]
 impl AuthnBackend for Backend {
-    type User = User;
+    type User = Appuser;
     type Credentials = Credentials;
     type Error = BackendError;
 
@@ -122,7 +122,7 @@ impl AuthnBackend for Backend {
         match creds {
             Self::Credentials::Password(password_cred) => {
                 let user: Option<Self::User> = sqlx::query_as(
-                    "select * from users where username = ? and password is not null",
+                    "select * from appuser where username = $1 and password is not null",
                 )
                 .bind(password_cred.username)
                 .fetch_optional(&self.db)
@@ -176,8 +176,8 @@ impl AuthnBackend for Backend {
                 // Persist user in our database so we can use `get_user`.
                 let user = sqlx::query_as(
                     r#"
-                    insert into users (username, access_token)
-                    values (?, ?)
+                    insert into appuser (username, access_token)
+                    values ($1, $2)
                     on conflict(username) do update
                     set access_token = excluded.access_token
                     returning *
@@ -195,7 +195,7 @@ impl AuthnBackend for Backend {
     }
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        Ok(sqlx::query_as("select * from users where id = ?")
+        Ok(sqlx::query_as("select * from appuser where appuser_id = $1")
             .bind(user_id)
             .fetch_optional(&self.db)
             .await

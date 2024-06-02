@@ -4,7 +4,7 @@ use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
 };
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, TokenUrl};
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 use time::Duration;
 use tower_http::trace::{self, TraceLayer};
 
@@ -14,7 +14,7 @@ use crate::{
 };
 
 pub struct App {
-    db: SqlitePool,
+    db: PgPool,
     client: BasicClient,
 }
 
@@ -29,11 +29,14 @@ impl App {
             .map(ClientSecret::new)
             .expect("CLIENT_SECRET should be provided");
 
+        let db_url = env::var("DATABASE_URL")
+            .expect("DATABASE_URL should be provided");
+
         let auth_url = AuthUrl::new("https://github.com/login/oauth/authorize".to_string())?;
         let token_url = TokenUrl::new("https://github.com/login/oauth/access_token".to_string())?;
         let client = BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url));
 
-        let db = SqlitePool::connect(":memory:").await?;
+        let db = PgPool::connect(&db_url).await?;
         sqlx::migrate!().run(&db).await?;
 
         Ok(Self { db, client })
