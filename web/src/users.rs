@@ -1,57 +1,19 @@
+use migration::sea_orm::{ColumnTrait, ActiveModelTrait, Set};
 use async_trait::async_trait;
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
-use axum_login::{tracing::{debug, error}, AuthUser, AuthnBackend, UserId};
+use axum_login::{tracing::warn, AuthnBackend, UserId};
+use entity::appuser::{self, Entity as Appuser};
+use migration::sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 use oauth2::{
     basic::{BasicClient, BasicRequestTokenError},
     reqwest::{async_http_client, AsyncHttpClientError},
     url::Url,
     AuthorizationCode, CsrfToken, TokenResponse,
 };
-use password_auth::verify_password;
-use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool, types::Uuid};
+use password_auth::{generate_hash, verify_password};
+use serde::Deserialize;
 use tokio::task;
 
-#[derive(Clone, Serialize, Deserialize, FromRow)]
-pub struct Appuser {
-    appuser_id: Uuid,
-    pub username: String,
-    pub password: Option<String>,
-    pub access_token: Option<String>,
-}
-
-// Here we've implemented `Debug` manually to avoid accidentally logging the
-// access token.
-impl std::fmt::Debug for Appuser {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("User")
-            .field("id", &self.appuser_id)
-            .field("username", &self.username)
-            .field("password", &"[redacted]")
-            .field("access_token", &"[redacted]")
-            .finish()
-    }
-}
-
-impl AuthUser for Appuser {
-    type Id = Uuid;
-
-    fn id(&self) -> Self::Id {
-        self.appuser_id
-    }
-
-    fn session_auth_hash(&self) -> &[u8] {
-        if let Some(access_token) = &self.access_token {
-            return access_token.as_bytes();
-        }
-
-        if let Some(password) = &self.password {
-            return password.as_bytes();
-        }
-
-        &[]
-    }
-}
 
 #[derive(Debug, Clone, Deserialize)]
 pub enum Credentials {
@@ -81,7 +43,7 @@ struct UserInfo {
 #[derive(Debug, thiserror::Error)]
 pub enum BackendError {
     #[error(transparent)]
-    Sqlx(sqlx::Error),
+    SeaORM(migration::DbErr),
 
     #[error(transparent)]
     Reqwest(reqwest::Error),
@@ -95,13 +57,13 @@ pub enum BackendError {
 
 #[derive(Debug, Clone)]
 pub struct Backend {
-    db: PgPool,
+    conn: DatabaseConnection,
     client: BasicClient,
 }
 
 impl Backend {
-    pub fn new(db: PgPool, client: BasicClient) -> Self {
-        Self { db, client }
+    pub fn new(conn: DatabaseConnection, client: BasicClient) -> Self {
+        Self { conn, client }
     }
 
     pub fn authorize_url(&self) -> (Url, CsrfToken) {
@@ -111,7 +73,7 @@ impl Backend {
 
 #[async_trait]
 impl AuthnBackend for Backend {
-    type User = Appuser;
+    type User = appuser::Model;
     type Credentials = Credentials;
     type Error = BackendError;
 
@@ -121,19 +83,19 @@ impl AuthnBackend for Backend {
     ) -> Result<Option<Self::User>, Self::Error> {
         match creds {
             Self::Credentials::Password(password_cred) => {
-                let user: Option<Self::User> = sqlx::query_as(
-                    "select * from appuser where username = $1 and password is not null",
-                )
-                .bind(password_cred.username)
-                .fetch_optional(&self.db)
-                .await
-                .map_err(Self::Error::Sqlx)?;
+
+                let user: Option<appuser::Model> = Appuser::find()
+                    .filter(entity::appuser::Column::Username.contains(password_cred.username))
+                    .one(&self.conn)
+                    .await
+                    .map_err(Self::Error::SeaORM)?;
 
                 // Verifying the password is blocking and potentially slow, so we'll do so via
                 // `spawn_blocking`.
+
+                // We're using password-based authentication: this works by comparing our form
+                // input with an argon2 password hash.
                 task::spawn_blocking(|| {
-                    // We're using password-based authentication: this works by comparing our form
-                    // input with an argon2 password hash.
                     Ok(user.filter(|user| {
                         let Some(ref password) = user.password else {
                             return false;
@@ -173,33 +135,26 @@ impl AuthnBackend for Backend {
                     .await
                     .map_err(Self::Error::Reqwest)?;
 
-                // Persist user in our database so we can use `get_user`.
-                let user = sqlx::query_as(
-                    r#"
-                    insert into appuser (username, access_token)
-                    values ($1, $2)
-                    on conflict(username) do update
-                    set access_token = excluded.access_token
-                    returning *
-                    "#,
-                )
-                .bind(user_info.login)
-                .bind(token_res.access_token().secret())
-                .fetch_one(&self.db)
-                .await
-                .map_err(Self::Error::Sqlx)?;
+                let user = appuser::ActiveModel {
+                    username: Set(user_info.login),
+                    access_token: Set(Some(token_res.access_token().secret().to_owned())),
+                    ..Default::default()
+                };
 
-                Ok(Some(user))
+                let res = user.insert(&self.conn)
+                    .await
+                    .map_err(Self::Error::SeaORM)?;
+
+                Ok(Some(res))
             }
         }
     }
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        Ok(sqlx::query_as("select * from appuser where appuser_id = $1")
-            .bind(user_id)
-            .fetch_optional(&self.db)
+        Ok(Appuser::find_by_id(*user_id)
+            .one(&self.conn)
             .await
-            .map_err(Self::Error::Sqlx)?)
+            .map_err(Self::Error::SeaORM)?)
     }
 }
 

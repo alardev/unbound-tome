@@ -52,11 +52,15 @@ mod post {
             {
                 Ok(Some(user)) => user,
                 Ok(None) => {
-                    return LoginTemplate {
+                    let mut response = LoginTemplate {
                         message: Some("Invalid credentials.".to_string()),
                         next: creds.next,
                     }
-                    .into_response()
+                    .into_response();
+                    
+                    *response.status_mut() = StatusCode::UNAUTHORIZED;
+
+                    return response
                 }
                 Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
             };

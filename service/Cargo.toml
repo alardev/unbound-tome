@@ -1,0 +1,28 @@
+[package]
+name = "unbound-tome-service"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+entity = { path = "../entity" }
+
+[dependencies.sea-orm]
+version = "1.0.0-rc.6" # sea-orm version
+features = [
+    "debug-print",
+    "runtime-async-std-rustls",
+    "sqlx-postgres",
+    "runtime-tokio-rustls"
+]
+
+[dev-dependencies]
+tokio = { version = "1.38.0", features = ["macros", "rt"] }
+
+[features]
+mock = ["sea-orm/mock"]
+
+[[test]]
+name = "mock"
+required-features = ["mock"]

@@ -4,7 +4,7 @@
 
 Axum
 Axum-login
-SQLx w/ Postgres
+SeaORM w/ Postgres
 Tailwind
 HTMX
 askama

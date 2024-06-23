@@ -4,17 +4,20 @@ use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
 };
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, TokenUrl};
-use sqlx::PgPool;
 use time::Duration;
 use tower_http::trace::{self, TraceLayer};
 
 use crate::{
     users::Backend,
-    web::{auth, oauth, home, protected},
+    web::{account, auth, home, oauth, test},
 };
 
+use unbound_tome_service::sea_orm::{Database, DatabaseConnection};
+
+use migration::{Migrator, MigratorTrait};
+
 pub struct App {
-    db: PgPool,
+    conn: DatabaseConnection,
     client: BasicClient,
 }
 
@@ -36,10 +39,12 @@ impl App {
         let token_url = TokenUrl::new("https://github.com/login/oauth/access_token".to_string())?;
         let client = BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url));
 
-        let db = PgPool::connect(&db_url).await?;
-        sqlx::migrate!().run(&db).await?;
+        let conn = Database::connect(db_url)
+            .await
+            .expect("Database connection failed");
+        Migrator::up(&conn, None).await.unwrap();
 
-        Ok(Self { db, client })
+        Ok(Self { conn, client })
     }
 
     pub async fn serve(self) -> Result<(), Box<dyn std::error::Error>> {
@@ -57,14 +62,17 @@ impl App {
         //
         // This combines the session layer with our backend to establish the auth
         // service which will provide the auth session as a request extension.
-        let backend = Backend::new(self.db, self.client);
+        let backend = Backend::new(self.conn, self.client);
         let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
 
-        let app = home::router()
-            // .route_layer(login_required!(Backend, login_url = "/login"))
+        let app = account::router()
+            .route_layer(login_required!(Backend, login_url = "/login"))
             .merge(auth::router())
             .merge(oauth::router())
+            .merge(home::router())
+            .merge(test::router())
+            // .route_layer(login_required!(Backend, login_url = "/login"))
             .layer(auth_layer)
             .layer(
                 TraceLayer::new_for_http()

@@ -19,8 +19,14 @@
                 <li>
                     <a class="hover:text-yellow-200" href="/about">About</a>
                 </li>
-                <li>
-                    <a class="bg-secondary px-5 py-2 rounded-full hover:bg-accent cursor-pointer">Sign in</a>
+                <li id="loginbutton">
+                    <a hx-get="/test" role="tab" 
+                    hx-target="#tab-content"
+                    aria-selected="true" 
+                    aria-controls="tab-content"
+                    class="bg-secondary px-5 py-2 
+                    rounded-full hover:bg-accent 
+                    cursor-pointer">Sign in</a>
                 </li>
             </ul>
         </div>

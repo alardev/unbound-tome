@@ -3,7 +3,9 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_USER: loco
+      POSTGRES_PASSWORD: loco
+      POSTGRES_DB: myapp_development
     volumes:
       - pgdata:/var/lib/postgresql/data 
     ports:

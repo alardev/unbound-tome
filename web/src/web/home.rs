@@ -1,6 +1,5 @@
 use askama::Template;
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
-use axum_login::tracing;
+use axum::{response::IntoResponse, routing::get, Router};
 use crate::users::AuthSession;
 
 #[derive(Template)]
@@ -22,7 +21,6 @@ mod get {
     use super::*;
 
     pub async fn protected(auth_session: AuthSession) -> impl IntoResponse {
-        tracing::debug!("HIII");
         match auth_session.user {
             Some(user) => ProtectedTemplate {
                 username: &user.username,
