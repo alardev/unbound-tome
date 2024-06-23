@@ -27,6 +27,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 
 ## Extra Planned Features
 - Support Docker and k8s
+- Consider supporting Valkey(Redis fork) and OpenTelemetry
 
 
 ## Installation
@@ -49,15 +50,17 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
     ```
 
 ### Development
-    Start The development server.
+5. Start The development server.
     ```bash
     cargo watch -x run
     ```
 
 ### Production
-    Build the production binary.
+5. Build the production binary.
     ```bash
     cargo build --release
     ```
 
-    
+## FAQ
+1. Why is the password verification so slow? (eg. 400ms on my PC)
+A: Password-auth crate's password verification is considerably slower if built in debug mode. Building using --release flag will reduce the verification considerably. (20ms on my PC)
