@@ -9,12 +9,14 @@ use tower_http::trace::{self, TraceLayer};
 
 use crate::{
     users::Backend,
-    web::{account, auth, home, oauth, test},
+    web::{account, auth, home, oauth},
 };
 
 use unbound_tome_service::sea_orm::{Database, DatabaseConnection};
 
 use migration::{Migrator, MigratorTrait};
+
+
 
 pub struct App {
     conn: DatabaseConnection,
@@ -71,8 +73,6 @@ impl App {
             .merge(auth::router())
             .merge(oauth::router())
             .merge(home::router())
-            .merge(test::router())
-            // .route_layer(login_required!(Backend, login_url = "/login"))
             .layer(auth_layer)
             .layer(
                 TraceLayer::new_for_http()

@@ -11,7 +11,7 @@ use serde::Deserialize;
 
 use crate::{
     users::{AuthSession, Credentials},
-    web::auth::{LoginTemplate, NEXT_URL_KEY},
+    web::auth::NEXT_URL_KEY,
 };
 
 pub const CSRF_STATE_KEY: &str = "oauth.csrf-state";
@@ -27,6 +27,8 @@ pub fn router() -> Router<()> {
 }
 
 mod get {
+    use maud::html;
+
     use super::*;
     use crate::users::OAuthCreds;
 
@@ -53,10 +55,10 @@ mod get {
             Ok(None) => {
                 return (
                     StatusCode::UNAUTHORIZED,
-                    LoginTemplate {
-                        message: Some("Invalid CSRF state.".to_string()),
-                        next: None,
-                    },
+                    html! { 
+                        ("Invalid credentials"
+                            .to_string())
+                    }
                 )
                     .into_response()
             }

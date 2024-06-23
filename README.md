@@ -10,7 +10,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 - SeaORM w/ Postgres
 - Tailwind
 - HTMX
-- Askama
+- Maud
 
 ## Planned Features
 - Oauth2 support via Axum-login
@@ -62,5 +62,6 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
     ```
 
 ## FAQ
-1. Why is the password verification so slow? (eg. 400ms on my PC)
-A: Password-auth crate's password verification is considerably slower if built in debug mode. Building using --release flag will reduce the verification considerably. (20ms on my PC)
+1. __Why is the password verification so slow? (eg. 400ms on my PC)__
+
+    Password-auth crate's password verification is considerably slower if built in debug mode. Building using --release flag will reduce the verification considerably. (20ms on my PC)

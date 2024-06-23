@@ -1,34 +1,38 @@
-use askama::Template;
 use axum::{response::IntoResponse, routing::get, Router};
 use crate::users::AuthSession;
-
-#[derive(Template)]
-#[template(path = "protected.html")]
-struct ProtectedTemplate<'a> {
-    username: &'a str,
-}
-
-#[derive(Template)]
-#[template(path = "public.html")]
-struct PublicTemplate;
+use axum_htmx::HxRequest;
+use maud::html;
+use crate::web::views;
 
 
 pub fn router() -> Router<()> {
-    Router::new().route("/", get(self::get::protected))
+    Router::new().route("/", get(self::get::homepage))
 }
 
 mod get {
     use super::*;
 
-    pub async fn protected(auth_session: AuthSession) -> impl IntoResponse {
-        match auth_session.user {
-            Some(user) => ProtectedTemplate {
-                username: &user.username,
-            }
-            .into_response(),
+    pub async fn homepage(
+        auth_session: AuthSession,
+        HxRequest(hx_request): HxRequest
+    ) -> impl IntoResponse  {
 
-            //None => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-            None => PublicTemplate.into_response(),
+        if hx_request {
+            //partial hx-request
+            views::shell::render(
+                auth_session.user,
+                html!(
+                    p { "Homepage partial load" }
+                )
+            )
+        } else {
+            //fullpage load
+            views::page(views::shell::render(
+                auth_session.user,
+                html!(
+                    p { "Homepage Full load" }
+                )
+            ))
         }
     }
 }

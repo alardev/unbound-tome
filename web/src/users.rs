@@ -1,7 +1,7 @@
 use migration::sea_orm::{ColumnTrait, ActiveModelTrait, Set};
 use async_trait::async_trait;
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
-use axum_login::{tracing::warn, AuthnBackend, UserId};
+use axum_login::{AuthnBackend, UserId};
 use entity::appuser::{self, Entity as Appuser};
 use migration::sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 use oauth2::{
@@ -10,7 +10,7 @@ use oauth2::{
     url::Url,
     AuthorizationCode, CsrfToken, TokenResponse,
 };
-use password_auth::{generate_hash, verify_password};
+use password_auth::verify_password;
 use serde::Deserialize;
 use tokio::task;
 
