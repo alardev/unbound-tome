@@ -63,7 +63,7 @@ mod post {
                                 StatusCode::UNAUTHORIZED,
                                 views::page(views::shell::render(
                                     None,
-                                    views::login::render(Some("Invalid credentials".to_string()))
+                                    views::login::render(Some("Invalid credentials".to_string()), None)
                                 ))).into_response()
                         }
                     }
@@ -136,12 +136,12 @@ mod get {
         Query(NextUrl { next }): Query<NextUrl>) -> impl IntoResponse {
         if hx_request {
             //partial hx-request
-            views::login::render(None)
+            views::login::render(None, next)
         } else {
             //fullpage load
             views::page(views::shell::render(
                 None,
-                views::login::render(None)
+                views::login::render(None, next)
             ))
         }
     }

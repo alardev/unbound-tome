@@ -49,6 +49,18 @@ pub fn render(
                                         "Sign out"
                                     }
                                 }
+
+                                li id="accountbutton" {
+                                    a hx-get="/account" role="tab"
+                                    hx-target="#tab-content"
+                                    aria-selected="true" 
+                                    aria-controls="tab-content"
+                                    class="bg-secondary px-5 py-2 
+                                    rounded-full hover:bg-accent 
+                                    cursor-pointer" {
+                                        "My Account"
+                                    }
+                                }
                             } @else {
                                 li id="loginbutton" {
                                     a hx-get="/login" role="tab"

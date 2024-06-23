@@ -1,7 +1,8 @@
 use maud::{html, Markup};
 
 pub fn render(
-    error_message: Option<String> 
+    error_message: Option<String>,
+    next: Option<String>
 ) -> Markup {
     html! {
         div class="w-full max-w-xs m-auto bg-background rounded p-5" {
@@ -54,6 +55,9 @@ pub fn render(
                 hx-target-error="#login-errors"
                 hx-target="#tab-content" {
                     "Login"
+                }
+                @if next.is_some() { 
+                    input type="hidden" name="next" value=(next.unwrap()) {} 
                 }
                 div class="text-3xl self-center" id="login-errors" {
                     @if error_message.is_some() {
