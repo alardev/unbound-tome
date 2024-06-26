@@ -20,6 +20,20 @@ pub fn render(
             }
 
             form {
+                label class="block mb-2" for="email" {
+                    "Email"
+                }
+                input class="w-full p-2 mb-6
+                text-accent border-b-2 
+                border-accent outline-none 
+                focus:bg-gray-300"
+                type="text"
+                name="email"
+                id="email"
+                placeholder="email"
+                value="test@test.test"
+                {}
+
                 label class="block mb-2" for="username" {
                     "Username"
                 }
@@ -33,6 +47,7 @@ pub fn render(
                 placeholder="username"
                 value="admin"
                 {}
+
                 label class="block mb-2" for="password" {
                     "Password"
                 }
@@ -46,16 +61,18 @@ pub fn render(
                 placeholder="password"
                 value="hunter42"
                 {}
+
                 button class="w-full 
                 bg-secondary hover:bg-accent 
                 cursor-pointer text-white 
                 font-bold py-2 px-4 mb-6 
                 rounded"
-                hx-post="/login/password"
+                hx-post="/register"
                 hx-target-error="#login-errors"
                 hx-target="#tab-content" {
-                    "Sign In"
+                    "Sign up"
                 }
+
                 @if next.is_some() { 
                     input type="hidden" name="next" value=(next.unwrap()) {} 
                 }
@@ -67,17 +84,14 @@ pub fn render(
             }
 
             footer class="pb-4" {
-                button class="hover:text-accent text-sm float-left"
-                hx-get="/forgot"
-                hx-push-url="true"
-                hx-target="#tab-content"{
-                    "Forgot Password?"
+                p class="text-sm float-left" {
+                    "Already have an account?"
                 }
                 button class="hover:text-accent text-sm float-right"
-                hx-get="/register"
+                hx-get="/login"
                 hx-push-url="true"
-                hx-target="#tab-content" {
-                    "Create Account"
+                hx-target="#tab-content"{
+                    "Sign in"
                 }
             }
         }

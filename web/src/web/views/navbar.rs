@@ -52,6 +52,7 @@ pub fn render(
 
                                 li id="accountbutton" {
                                     a hx-get="/account" role="tab"
+                                    hx-push-url="true"
                                     hx-target="#tab-content"
                                     aria-selected="true" 
                                     aria-controls="tab-content"
@@ -64,6 +65,7 @@ pub fn render(
                             } @else {
                                 li id="loginbutton" {
                                     a hx-get="/login" role="tab"
+                                    hx-push-url="true"
                                     hx-target="#tab-content"
                                     aria-selected="true" 
                                     aria-controls="tab-content"

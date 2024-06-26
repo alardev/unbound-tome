@@ -3,6 +3,7 @@ use maud::{html, Markup};
 pub mod shell;
 pub mod navbar;
 pub mod login;
+pub mod register;
 
 pub fn page(body: Markup) -> Markup {
     html! {
