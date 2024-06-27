@@ -1,0 +1,20 @@
+[package]
+name = "unbound-tome-domains"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "domains"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+axum-login = { version = "*" }
+chrono = { version = "0.4.38", features = ["serde"] }
+uuid = { version = "1.9.1", features = ["serde", "v4"] }
+oso = { version = "*", features = ["uuid-10"] }
+oso-derive = "*"
+
+[dependencies.sea-orm]
+version = "1.0.0-rc.7" # sea-orm version

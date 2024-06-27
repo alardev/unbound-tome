@@ -6,10 +6,10 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-entity = { path = "../entity" }
+unbound-tome-domains = { path = "../domains" }
 
 [dependencies.sea-orm]
-version = "1.0.0-rc.6" # sea-orm version
+version = "1.0.0-rc.7" # sea-orm version
 features = [
     "debug-print",
     "runtime-async-std-rustls",

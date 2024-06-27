@@ -1,0 +1,10 @@
+[package]
+name = "unbound-tome-utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+figment = { version = "0.10.19", features = ["env", "toml"] }
+once_cell = "*"
+serde = { version = "1.0.203", features = ["derive"] }
+serde_derive = "1.0"

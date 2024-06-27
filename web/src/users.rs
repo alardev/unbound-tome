@@ -2,7 +2,7 @@ use migration::sea_orm::{ColumnTrait, ActiveModelTrait, Set};
 use async_trait::async_trait;
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
 use axum_login::{AuthnBackend, UserId};
-use entity::appuser::{self, Entity as Appuser};
+use domains::appuser::{self, Entity as Appuser};
 use migration::sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 use oauth2::{
     basic::{BasicClient, BasicRequestTokenError},
@@ -13,6 +13,7 @@ use oauth2::{
 use password_auth::verify_password;
 use serde::Deserialize;
 use tokio::task;
+use std::sync::Arc;
 
 
 #[derive(Debug, Clone, Deserialize)]
@@ -57,12 +58,12 @@ pub enum BackendError {
 
 #[derive(Debug, Clone)]
 pub struct Backend {
-    conn: DatabaseConnection,
+    conn: Arc<DatabaseConnection>,
     client: BasicClient,
 }
 
 impl Backend {
-    pub fn new(conn: DatabaseConnection, client: BasicClient) -> Self {
+    pub fn new(conn: Arc<DatabaseConnection>, client: BasicClient) -> Self {
         Self { conn, client }
     }
 
@@ -83,10 +84,9 @@ impl AuthnBackend for Backend {
     ) -> Result<Option<Self::User>, Self::Error> {
         match creds {
             Self::Credentials::Password(password_cred) => {
-
                 let user: Option<appuser::Model> = Appuser::find()
-                    .filter(entity::appuser::Column::Username.contains(password_cred.username))
-                    .one(&self.conn)
+                    .filter(domains::appuser::Column::Username.contains(password_cred.username))
+                    .one(self.conn.as_ref())
                     .await
                     .map_err(Self::Error::SeaORM)?;
 
@@ -141,7 +141,7 @@ impl AuthnBackend for Backend {
                     ..Default::default()
                 };
 
-                let res = user.insert(&self.conn)
+                let res = user.insert(self.conn.as_ref())
                     .await
                     .map_err(Self::Error::SeaORM)?;
 
@@ -152,7 +152,7 @@ impl AuthnBackend for Backend {
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         Ok(Appuser::find_by_id(*user_id)
-            .one(&self.conn)
+            .one(self.conn.as_ref())
             .await
             .map_err(Self::Error::SeaORM)?)
     }

@@ -1,11 +1,11 @@
-use std::env;
-
 use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
 };
 use oauth2::{basic::BasicClient, AuthUrl, ClientId, ClientSecret, TokenUrl};
+use oso::{Oso, PolarClass};
 use time::Duration;
 use tower_http::trace::{self, TraceLayer};
+use unbound_tome_utils::config::Config;
 
 use crate::{
     users::Backend,
@@ -15,38 +15,52 @@ use crate::{
 use unbound_tome_service::sea_orm::{Database, DatabaseConnection};
 
 use migration::{Migrator, MigratorTrait};
+use std::sync::Arc;
 
-
+use domains::appuser::{User as Appuser, AUTHORIZATION as USERS_AUTHZ,};
 
 pub struct App {
-    conn: DatabaseConnection,
-    client: BasicClient,
+    /// The app config
+    pub config: &'static Config,
+
+    /// The database connections
+    pub db: Arc<DatabaseConnection>,
+
+    /// The `Oso` authorization library
+    pub oso: Oso,
+
+    /// The OAuth2 basic client
+    pub client: BasicClient,
 }
 
 impl App {
-    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        dotenvy::dotenv()?;
+    pub async fn new(config: &'static Config) -> Result<Self, Box<dyn std::error::Error>> {
 
-        let client_id = env::var("CLIENT_ID")
-            .map(ClientId::new)
-            .expect("CLIENT_ID should be provided.");
-        let client_secret = env::var("CLIENT_SECRET")
-            .map(ClientSecret::new)
-            .expect("CLIENT_SECRET should be provided");
+        let db: Arc<DatabaseConnection> = Arc::new(Database::connect(&config.database.url).await?);
 
-        let db_url = env::var("DATABASE_URL")
-            .expect("DATABASE_URL should be provided");
+        Migrator::up(db.as_ref(), None).await.unwrap();
 
-        let auth_url = AuthUrl::new("https://github.com/login/oauth/authorize".to_string())?;
-        let token_url = TokenUrl::new("https://github.com/login/oauth/access_token".to_string())?;
-        let client = BasicClient::new(client_id, Some(client_secret), auth_url, Some(token_url));
+        // Set up authorization
+        let mut oso = Oso::new();
 
-        let conn = Database::connect(db_url)
-            .await
-            .expect("Database connection failed");
-        Migrator::up(&conn, None).await.unwrap();
 
-        Ok(Self { conn, client })
+        oso.register_class(Appuser::get_polar_class_builder().name("User").build())?;
+
+        oso.load_str(&[USERS_AUTHZ].join("\n"))?;
+
+        let client = BasicClient::new(
+            config.auth.client.id.clone().map(ClientId::new).expect("CLIENT_ID should be provided."), 
+            config.auth.client.secret.clone().map(ClientSecret::new), 
+            AuthUrl::new(config.auth.url.clone())?, 
+            Some(TokenUrl::new(config.auth.token_url.clone())?)
+        );
+
+        Ok(Self { 
+            config, 
+            db, 
+            oso,
+            client 
+        })
     }
 
     pub async fn serve(self) -> Result<(), Box<dyn std::error::Error>> {
@@ -64,7 +78,7 @@ impl App {
         //
         // This combines the session layer with our backend to establish the auth
         // service which will provide the auth session as a request extension.
-        let backend = Backend::new(self.conn, self.client);
+        let backend = Backend::new(self.db, self.client);
         let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
 

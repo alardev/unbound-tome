@@ -126,7 +126,7 @@ mod post {
     pub(super) mod register {
         use axum::body::Body;
         use axum_htmx::HxRequest;
-        use entity::appuser::Entity as Appuser;
+        use domains::appuser::Entity as Appuser;
         use http::Response;
         use maud::html;
 

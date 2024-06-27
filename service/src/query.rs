@@ -1,4 +1,4 @@
-use ::entity::{appuser, appuser::Entity as Appuser};
+use ::domains::{appuser, appuser::Entity as Appuser};
 use prelude::Uuid;
 use sea_orm::*;
 

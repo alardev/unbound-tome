@@ -1,6 +1,6 @@
 use sea_orm::Set;
 use sea_orm_migration::prelude::*;
-use entity::appuser;
+use domains::appuser;
 use sea_orm_migration::sea_orm::ActiveModelTrait;
 
 #[derive(DeriveMigrationName)]
@@ -22,6 +22,8 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .primary_key(),
                     )
+                    .col(ColumnDef::new(Appuser::CreatedAt).date_time().not_null())
+                    .col(ColumnDef::new(Appuser::UpdatedAt).date_time().not_null())
                     .col(ColumnDef::new(Appuser::Username).string().not_null())
                     .col(ColumnDef::new(Appuser::Password).string())
                     .col(ColumnDef::new(Appuser::AccessToken).string())
@@ -50,6 +52,8 @@ impl MigrationTrait for Migration {
 enum Appuser {
     Table,
     Id,
+    CreatedAt,
+    UpdatedAt,
     Username,
     Password,
     AccessToken

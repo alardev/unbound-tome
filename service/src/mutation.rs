@@ -1,4 +1,4 @@
-use ::entity::{appuser, appuser::Entity as Appuser};
+use ::domains::{appuser, appuser::Entity as Appuser};
 use prelude::Uuid;
 use sea_orm::*;
 
@@ -34,6 +34,8 @@ impl Mutation {
             username: Set(form_data.username.to_owned()),
             password: Set(form_data.password.to_owned()),
             access_token: Set(form_data.access_token.to_owned()),
+            created_at: todo!(),
+            updated_at: todo!(),
         }
         .update(db)
         .await
