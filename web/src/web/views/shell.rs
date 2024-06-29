@@ -1,4 +1,4 @@
-use domains::appuser::Model;
+use domains::users::model::Model;
 use maud::{html, Markup};
 
 use crate::web::views;

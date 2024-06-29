@@ -131,7 +131,7 @@ mod post {
     pub(super) mod register {
         use axum::body::Body;
         use axum_htmx::HxRequest;
-        use domains::appuser::Entity as Appuser;
+        use domains::users::model::Entity as User;
         use http::Response;
         use maud::html;
 
@@ -150,7 +150,7 @@ mod post {
 
             // backend.
 
-            // let user = Appuser::find()
+            // let user = User::find()
             //     .one(conn)
             //     .await
             // {

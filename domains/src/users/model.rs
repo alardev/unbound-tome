@@ -22,7 +22,7 @@ pub const AUTHORIZATION: &str = include_str!("authorization.polar");
     Serialize,
     PolarClass,
 )]
-#[sea_orm(table_name = "appuser")]
+#[sea_orm(table_name = "user")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     #[polar(attribute)]

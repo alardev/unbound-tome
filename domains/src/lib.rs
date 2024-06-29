@@ -2,7 +2,7 @@
 
 pub mod prelude;
 
-pub mod appuser;
+pub mod users;
 pub mod role_grants;
 
-pub const AUTHORIZATION: &str = include_str!("authorization.polar");
+pub const AUTHORIZATION: &str = include_str!("users/authorization.polar");

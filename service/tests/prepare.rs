@@ -1,4 +1,4 @@
-use ::domains::appuser;
+use ::domains::users::model;
 use sea_orm::*;
 
 #[cfg(feature = "mock")]

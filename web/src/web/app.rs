@@ -17,7 +17,7 @@ use unbound_tome_service::sea_orm::{Database, DatabaseConnection};
 use migration::{Migrator, MigratorTrait};
 use std::sync::Arc;
 
-use domains::appuser::{User as Appuser, AUTHORIZATION as USERS_AUTHZ,};
+use domains::users::model::{User as User, AUTHORIZATION as USERS_AUTHZ,};
 
 pub struct Context {
     /// The app config
@@ -41,11 +41,9 @@ impl Context {
         // Set up authorization
         let mut oso = Oso::new();
 
-        oso.register_class(Appuser::get_polar_class_builder().name("User").build())?;
+        // oso.register_class(User::get_polar_class_builder().name("User").build())?;
 
-        
-
-        // oso.load_str(&[USERS_AUTHZ].join("\n"))?;
+        // oso.load_str(&USERS_AUTHZ)?;
 
         Ok(Self { 
             config, 

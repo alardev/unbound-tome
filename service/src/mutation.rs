@@ -1,15 +1,15 @@
-use ::domains::{appuser, appuser::Entity as Appuser};
+use ::domains::{users, users::model::Entity as User};
 use prelude::Uuid;
 use sea_orm::*;
 
 pub struct Mutation;
 
 impl Mutation {
-    // pub async fn create_appuser(
+    // pub async fn create_user(
     //     db: &DbConn,
-    //     form_data: appuser::Model,
-    // ) -> Result<appuser::ActiveModel, DbErr> {
-    //     appuser::ActiveModel {
+    //     form_data: user::Model,
+    // ) -> Result<user::ActiveModel, DbErr> {
+    //     user::ActiveModel {
     //         username: Set(form_data.username.to_owned()),
     //         // text: Set(form_data.text.to_owned()),
     //         ..Default::default()
@@ -18,18 +18,18 @@ impl Mutation {
     //     .await
     // }
 
-    // pub async fn update_appuser_by_id(
+    // pub async fn update_user_by_id(
     //     db: &DbConn,
     //     id: Uuid,
-    //     form_data: appuser::Model,
-    // ) -> Result<appuser::Model, DbErr> {
-    //     let post: appuser::ActiveModel = Appuser::find_by_id(id)
+    //     form_data: user::Model,
+    // ) -> Result<user::Model, DbErr> {
+    //     let post: user::ActiveModel = User::find_by_id(id)
     //         .one(db)
     //         .await?
-    //         .ok_or(DbErr::Custom("Cannot find appuser.".to_owned()))
+    //         .ok_or(DbErr::Custom("Cannot find user.".to_owned()))
     //         .map(Into::into)?;
 
-    //     appuser::ActiveModel {
+    //     user::ActiveModel {
     //         id: post.id,
     //         username: Set(form_data.username.to_owned()),
     //         password: Set(form_data.password.to_owned()),
@@ -41,17 +41,17 @@ impl Mutation {
     //     .await
     // }
 
-    // pub async fn delete_appuser(db: &DbConn, id: Uuid) -> Result<DeleteResult, DbErr> {
-    //     let appuser: appuser::ActiveModel = Appuser::find_by_id(id)
+    // pub async fn delete_user(db: &DbConn, id: Uuid) -> Result<DeleteResult, DbErr> {
+    //     let user: user::ActiveModel = User::find_by_id(id)
     //         .one(db)
     //         .await?
-    //         .ok_or(DbErr::Custom("Cannot find appuser.".to_owned()))
+    //         .ok_or(DbErr::Custom("Cannot find user.".to_owned()))
     //         .map(Into::into)?;
 
-    //     appuser.delete(db).await
+    //     user.delete(db).await
     // }
 
-    // pub async fn delete_all_appusers(db: &DbConn) -> Result<DeleteResult, DbErr> {
-    //     Appuser::delete_many().exec(db).await
+    // pub async fn delete_all_users(db: &DbConn) -> Result<DeleteResult, DbErr> {
+    //     User::delete_many().exec(db).await
     // }
 }

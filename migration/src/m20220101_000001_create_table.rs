@@ -1,6 +1,6 @@
 use sea_orm::Set;
 use sea_orm_migration::prelude::*;
-use domains::appuser;
+use domains::users;
 use sea_orm_migration::sea_orm::ActiveModelTrait;
 
 #[derive(DeriveMigrationName)]
@@ -14,24 +14,24 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Appuser::Table)
+                    .table(User::Table)
                     .if_not_exists()
                     .col(
-                        ColumnDef::new(Appuser::Id)
+                        ColumnDef::new(User::Id)
                             .uuid()
                             .not_null()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Appuser::CreatedAt).date_time().not_null())
-                    .col(ColumnDef::new(Appuser::UpdatedAt).date_time().not_null())
-                    .col(ColumnDef::new(Appuser::Username).string().not_null())
-                    .col(ColumnDef::new(Appuser::Password).string())
-                    .col(ColumnDef::new(Appuser::AccessToken).string())
+                    .col(ColumnDef::new(User::CreatedAt).date_time().not_null())
+                    .col(ColumnDef::new(User::UpdatedAt).date_time().not_null())
+                    .col(ColumnDef::new(User::Username).string().not_null())
+                    .col(ColumnDef::new(User::Password).string())
+                    .col(ColumnDef::new(User::AccessToken).string())
                     .to_owned(),
             )
             .await?;
 
-        appuser::ActiveModel {
+        users::model::ActiveModel {
             username: Set("admin".to_owned()),
             password: Set(Some("$argon2id$v=19$m=19456,t=2,p=1$VE0e3g7DalWHgDwou3nuRA$uC6TER156UQpk0lNQ5+jHM0l5poVjPA1he/Tyn9J4Zw".to_owned())),
             ..Default::default()
@@ -43,13 +43,13 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Appuser::Table).to_owned())
+            .drop_table(Table::drop().table(User::Table).to_owned())
             .await
     }
 }
 
 #[derive(DeriveIden)]
-enum Appuser {
+enum User {
     Table,
     Id,
     CreatedAt,

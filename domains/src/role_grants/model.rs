@@ -5,7 +5,7 @@ use oso::PolarClass;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::appuser as user_model;
+use crate::users::model as user_model;
 
 /// The `RoleGrant` GraphQL and Database Model
 #[derive(

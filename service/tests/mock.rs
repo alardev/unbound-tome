@@ -1,7 +1,7 @@
 mod prepare;
 
 use unbound_tome_service::{Mutation, Query};
-use entity::appuser;
+use entity::user;
 use prepare::prepare_mock_db;
 
 #[tokio::test]
@@ -9,7 +9,7 @@ async fn main() {
     let db = &prepare_mock_db();
 
     {
-        let appuser = Query::find_appuser_by_id(db, 1).await.unwrap().unwrap();
+        let user = Query::find_user_by_id(db, 1).await.unwrap().unwrap();
 
         assert_eq!(post.id, 1);
     }
