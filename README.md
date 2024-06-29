@@ -16,18 +16,20 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 ## Planned Features
 - Oauth2 support via Axum-login
 - Support for 5e.tools json import and updates
-- import/export of character sheets
-- import/export of campaign data
-- import/export of different systems
-- export charsheets as PDF
-- in-campaign chat 
+- Import/export of character sheets
+- Import/export of campaign data
+- Import/export of different systems
+- Export charsheets as PDF
+- In-campaign chat 
 - Admin dashboard
-- event log
-- tracing and monitoring
+- Event log
+- Tracing and monitoring
 - PWA support for android and ios
 
 ## Extra Planned Features
-- Support Docker and k8s
+- Implement CI/CD via Github Actions
+- Support Docker and Docker Compose
+- Support Helm Charts for Kubernetes deployments
 - Consider supporting Valkey(Redis fork) and OpenTelemetry
 
 
