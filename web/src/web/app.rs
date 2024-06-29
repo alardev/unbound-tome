@@ -9,10 +9,7 @@ use time::Duration;
 use tower_http::trace::{self, TraceLayer};
 use unbound_tome_utils::config::Config;
 
-use crate::{
-    web::middleware::auth::Backend,
-    web::routers::{account, auth, home, oauth},
-};
+use crate::web::{middleware::auth::Backend, routers::{account, auth, health, home, oauth}};
 
 use migration::{sea_orm::{Database, DatabaseConnection}, Migrator, MigratorTrait};
 use std::sync::Arc;
@@ -91,6 +88,7 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
         .merge(auth::router())
         .merge(oauth::router())
         .merge(home::router())
+        .merge(health::router())
         .layer(auth_layer)
         .layer(
             TraceLayer::new_for_http()

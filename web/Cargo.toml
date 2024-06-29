@@ -33,6 +33,7 @@ oso = "*"
 figment = { version = "0.10.19", features = ["env", "toml"] }
 once_cell = "*"
 serde_derive = "1.0"
+serde_json = "1.0"
 
 unbound-tome-utils = { path = "../utils" }
 unbound-tome-domains = { path = "../domains" }

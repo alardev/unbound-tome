@@ -30,6 +30,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 - Implement CI/CD via Github Actions
 - Support Docker and Docker Compose
 - Support Helm Charts for Kubernetes deployments
+- Add health check endpoints and a status page
 - Consider supporting Valkey(Redis fork) and OpenTelemetry
 
 
@@ -41,7 +42,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
     cargo install sea-orm-cli
     ```
 
-2. Create the .env file and configure your tokens (OAuth2 if needed) and the DB url.
+2. Modify the configuration toml's in the config directory.
 
 3. Initialize the postgres container.
     ```bash
