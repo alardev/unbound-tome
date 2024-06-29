@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use axum::Extension;
 use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
@@ -20,21 +22,24 @@ use domains::{
         Campaign,
         AUTHORIZATION as CAMPAIGNS_AUTHZ,
     }, 
-    users::model::{
+    users::{model::{
         User as User, 
         AUTHORIZATION as USERS_AUTHZ,
-    }
+    }, resolver::{UsersService, UsersServiceTrait}}
 };
 
 pub struct Context {
     /// The app config
     pub config: &'static Config,
 
+    /// The `Oso` authorization library
+    pub oso: Oso,
+
+    /// The `User` entity service
+    pub users: Arc<dyn UsersServiceTrait>,
+
     /// The database connections
     pub db: Arc<DatabaseConnection>,
-
-    /// The `Oso` authorization library
-    pub oso: Oso
 }
 
 impl Context {
@@ -55,8 +60,9 @@ impl Context {
 
         Ok(Self { 
             config, 
-            db, 
-            oso
+            oso,
+            users: Arc::new(UsersService::new(&db)),
+            db,
         })
     }
 }
