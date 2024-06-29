@@ -9,9 +9,9 @@ use axum_login::tower_sessions::Session;
 use oauth2::CsrfToken;
 use serde::Deserialize;
 
-use crate::{
-    users::{AuthSession, Credentials},
-    web::auth::NEXT_URL_KEY,
+use crate::web::{
+    routers::auth::NEXT_URL_KEY,
+    middleware::auth::{AuthSession, Credentials},
 };
 
 pub const CSRF_STATE_KEY: &str = "oauth.csrf-state";
@@ -30,7 +30,7 @@ mod get {
     use maud::html;
 
     use super::*;
-    use crate::users::OAuthCreds;
+    use crate::web::middleware::auth::OAuthCreds;
 
     pub async fn callback(
         mut auth_session: AuthSession,

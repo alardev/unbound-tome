@@ -1,18 +1,16 @@
 use migration::sea_orm::{ColumnTrait, ActiveModelTrait, Set};
 use async_trait::async_trait;
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
-use axum_login::{AuthnBackend, UserId};
+use axum_login::{tracing::{error, info}, AuthnBackend, UserId};
 use domains::appuser::{self, Entity as Appuser};
 use migration::sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 use oauth2::{
-    basic::{BasicClient, BasicRequestTokenError},
-    reqwest::{async_http_client, AsyncHttpClientError},
-    url::Url,
-    AuthorizationCode, CsrfToken, TokenResponse,
+    basic::{BasicClient, BasicRequestTokenError}, reqwest::{async_http_client, AsyncHttpClientError}, url::Url, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, TokenResponse, TokenUrl
 };
 use password_auth::verify_password;
 use serde::Deserialize;
 use tokio::task;
+use unbound_tome_utils::config::OAuth;
 use std::sync::Arc;
 
 
@@ -59,16 +57,97 @@ pub enum BackendError {
 #[derive(Debug, Clone)]
 pub struct Backend {
     conn: Arc<DatabaseConnection>,
-    client: BasicClient,
+    client: Option<BasicClient>,
 }
 
 impl Backend {
-    pub fn new(conn: Arc<DatabaseConnection>, client: BasicClient) -> Self {
-        Self { conn, client }
+    pub fn new(conn: Arc<DatabaseConnection>, oauth_config: OAuth ) -> Result<Self, Box<dyn std::error::Error>> {
+        
+        // TODO: FIX THIS GARBAGE 💀💀💀💀💀
+
+        let client = match oauth_config.enabled {
+            true => {
+                info!("OAuth2 enabled!");
+                
+                let client = match oauth_config.client {
+                    Some(c) => c, 
+                    None => {
+                        error!("OAuth2 client section should be configured!");
+                        return Err("OAuth2 client section should be configured!".into())
+                    }
+                };
+
+                let client_id = match client.id {
+                    Some(id) => {
+                        ClientId::new(id)
+                    },
+                    None => {
+                        error!("OAuth2 client id should be configured!💀");
+                        return Err("OAuth2 client id should be configured!".into())
+                    }
+                };
+
+                let client_secret = match client.secret {
+                    Some(secret) => {
+                        Some(ClientSecret::new(secret))
+                    },
+                    None => {
+                        error!("OAuth2 client secret should be configured!");
+                        return Err("OAuth2 client secret should be configured!".into())
+                    }
+                };
+
+                let auth_url = match oauth_config.url {
+                    Some(u) => {
+                        let url = AuthUrl::new(u);
+                        match url {
+                            Ok(u) => u,
+                            Err(_) => {
+                                error!("Oauth2 auth url parsing failed!");
+                                return Err("Oauth2 auth url parsing failed!".into())
+                            }
+                        }
+                    },
+                    None => {
+                        error!("OAuth2 auth url should be configured!");
+                        return Err("OAuth2 auth url should be configured!".into())
+                    }
+                };
+
+                let token_url = match oauth_config.token_url {
+                    Some(t) => {
+                        let tokenurl = TokenUrl::new(t);
+                        match tokenurl {
+                            Ok(t) => Some(t),
+                            Err(_) => {
+                                error!("Oauth2 token url parsing failed!");
+                                return Err("Oauth2 token url parsing failed!".into())
+                            }
+                        }
+                    },
+                    None => {
+                        error!("OAuth2 token url should be configured!");
+                        return Err("OAuth2 token url should be configured!".into())
+                    }
+                };
+                
+                Some(BasicClient::new(
+                    client_id, 
+                    client_secret,
+                    auth_url,
+                    token_url
+                ))
+            },
+            false => None
+        };
+
+        Ok(Self { conn, client })
     }
 
     pub fn authorize_url(&self) -> (Url, CsrfToken) {
-        self.client.authorize_url(CsrfToken::new_random).url()
+
+        // Client unwrapped due to the fact that this method will only be called by oauth middleware.
+        self.client.as_ref().unwrap().authorize_url(CsrfToken::new_random).url()
     }
 }
 
@@ -114,7 +193,7 @@ impl AuthnBackend for Backend {
 
                 // Process authorization code, expecting a token response back.
                 let token_res = self
-                    .client
+                    .client.as_ref().unwrap()
                     .exchange_code(AuthorizationCode::new(oauth_creds.code))
                     .request_async(async_http_client)
                     .await
@@ -162,3 +241,5 @@ impl AuthnBackend for Backend {
 //
 // Note that we've supplied our concrete backend here.
 pub type AuthSession = axum_login::AuthSession<Backend>;
+
+

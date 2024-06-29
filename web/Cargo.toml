@@ -27,7 +27,7 @@ tower-http = { version = "0.5.2", features = ["trace"] }
 password-auth = { version = "1.0.0" }
 thiserror = "1.0.61"
 #sqlx = { version = "0.7.4", features = ["postgres", "time", "runtime-tokio", "json", "uuid"] }
-uuid = { version = "1.8.0", features = ["serde", "v4"] }
+uuid = { version = "1.9.1", features = ["serde", "v4"] }
 maud = { version = "*", features = ["axum"] }
 oso = "*"
 figment = { version = "0.10.19", features = ["env", "toml"] }

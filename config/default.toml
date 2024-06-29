@@ -1,0 +1,28 @@
+# Default settings
+
+run_mode = "development"
+port = 3000
+
+[database]
+hostname = "localhost"
+username = "unboundtome"
+password = "changeme"
+name = "unbound_tome_development"
+port = 5432
+url = "postgresql://unboundtome:changeme@localhost:5432/unbound_tome_development"
+debug = false
+
+[database.pool]
+
+[valkey]
+url = "localhost:6379"
+
+[oauth]
+enabled = true
+url = "https://github.com/login/oauth/authorize"
+audience = "localhost"
+token_url = "https://github.com/login/oauth/access_token"
+
+[oauth.client]
+id = "client_id"
+secret = "client_secret"

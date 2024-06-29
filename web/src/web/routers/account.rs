@@ -1,8 +1,10 @@
 use axum::{response::IntoResponse, routing::get, Router};
-use crate::users::AuthSession;
 use axum_htmx::HxRequest;
 use maud::html;
-use crate::web::views;
+use crate::web::{
+    views,
+    middleware::auth::AuthSession
+};
 
 pub fn router() -> Router<()> {
     Router::new().route("/account", get(self::get::account))

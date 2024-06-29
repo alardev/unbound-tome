@@ -8,7 +8,7 @@ use axum::{
 use axum_login::tower_sessions::Session;
 use serde::Deserialize;
 
-use crate::{users::AuthSession, web::oauth::CSRF_STATE_KEY};
+use crate::{web::middleware::auth::AuthSession, web::routers::oauth::CSRF_STATE_KEY};
 
 pub const NEXT_URL_KEY: &str = "auth.next-url";
 
@@ -20,13 +20,18 @@ pub struct NextUrl {
 }
 
 pub fn router() -> Router<()> {
-    Router::new()
+    let mut router = Router::new()
         .route("/login/password", post(self::post::login::password))
-        .route("/login/oauth", post(self::post::login::oauth))
         .route("/login", get(self::get::login))
         .route("/logout", get(self::get::logout))
         .route("/register", get(self::get::register))
-        .route("/register/password", post(self::post::register::password))
+        .route("/register/password", post(self::post::register::password));
+
+    if true {
+        router = router.route("/login/oauth", post(self::post::login::oauth))
+    }
+
+    router
 }
 
 mod post {
@@ -40,7 +45,7 @@ mod post {
         
 
         use super::*;
-        use crate::{users::{Credentials, PasswordCreds}, web::views};
+        use crate::{web::middleware::auth::{Credentials, PasswordCreds}, web::views};
 
         pub async fn password(
             mut auth_session: AuthSession,
@@ -131,7 +136,7 @@ mod post {
         use maud::html;
 
         use super::*;
-        use crate::{users::{Credentials, PasswordCreds}, web::views};
+        use crate::{web::middleware::auth::{Credentials, PasswordCreds}, web::views};
 
 
         pub async fn password(
@@ -140,7 +145,7 @@ mod post {
             Form(creds): Form<PasswordCreds>,
         ) -> impl IntoResponse {
 
-            todo!("implement me!")
+            // todo!("implement me!")
             // let backend = auth_session.backend;
 
             // backend.

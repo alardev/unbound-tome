@@ -49,7 +49,7 @@ pub struct Valkey {
 
 /// Auth client config
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct AuthClient {
+pub struct OAuthClient {
     /// OAuth2 client id
     pub id: Option<String>,
     /// OAuth2 client secret
@@ -58,15 +58,17 @@ pub struct AuthClient {
 
 /// Auth config
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Auth {
+pub struct OAuth {
+    /// OAuth2 switch
+    pub enabled: bool,
     /// OAuth2 url
-    pub url: String,
+    pub url: Option<String>,
     /// OAuth2 Access Token url
-    pub token_url: String,
+    pub token_url: Option<String>,
     /// OAuth2 audience
-    pub audience: String,
+    pub audience: Option<String>,
     /// Auth client config
-    pub client: AuthClient,
+    pub client: Option<OAuthClient>,
 }
 
 /// Application Config
@@ -81,7 +83,7 @@ pub struct Config {
     /// Valkey config
     pub valkey: Valkey,
     /// Auth config
-    pub auth: Auth,
+    pub oauth: OAuth,
 }
 
 impl Config {
@@ -111,10 +113,12 @@ impl Config {
                     .map(|key| key.as_str().replace("VALKEY_", "VALKEY.").into())
                     // Split the Auth variables
                     .map(|key| key.as_str().replace("AUTH_CLIENT_", "AUTH.CLIENT.").into())
-                    .map(|key| key.as_str().replace("AUTH_", "AUTH.").into()),
+                    .map(|key| key.as_str().replace("OAUTH_", "OAUTH.").into()),
             )
             // Serialize and freeze
             .extract()?;
+
+
 
         Ok(config)
     }

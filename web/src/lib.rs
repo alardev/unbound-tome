@@ -1,13 +1,10 @@
 #![forbid(unsafe_code)]
 
 use std::sync::Arc;
-use axum_login::tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 use unbound_tome_utils::config::get_config;
+use crate::web::app::Context;
 
-use crate::web::App;
-
-mod users;
 mod web;
 
 #[tokio::main]
@@ -21,7 +18,9 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = get_config();
 
-    let app = Arc::new(App::new(config).await?.serve().await);
+    let ctx = Context::new(config).await?;
+
+    Arc::new(web::app::serve(ctx.into()).await);
 
     Ok(())
 }

@@ -11,6 +11,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 - Tailwind
 - HTMX
 - Maud
+- Oso
 
 ## Planned Features
 - Oauth2 support via Axum-login
