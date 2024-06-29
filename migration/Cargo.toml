@@ -11,6 +11,7 @@ path = "src/lib.rs"
 [dependencies]
 async-std = { version = "1", features = ["attributes", "tokio1"] }
 unbound-tome-domains = { path = "../domains" }
+chrono = { version = "0.4.38", features = ["serde"] }
 
 [dependencies.sea-orm-migration]
 version = "1.0.0-rc.7"

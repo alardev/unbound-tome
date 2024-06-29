@@ -5,7 +5,7 @@ edition = "2021"
 publish = false
 
 [workspace]
-members = [".", "web", "service", "domains", "migration", "utils"]
+members = [".", "web", "domains", "migration", "utils"]
 
 [dependencies]
 unbound-tome-web = { path = "web" }

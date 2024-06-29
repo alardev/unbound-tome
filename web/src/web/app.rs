@@ -12,12 +12,19 @@ use crate::{
     web::routers::{account, auth, home, oauth},
 };
 
-use unbound_tome_service::sea_orm::{Database, DatabaseConnection};
-
-use migration::{Migrator, MigratorTrait};
+use migration::{sea_orm::{Database, DatabaseConnection}, Migrator, MigratorTrait};
 use std::sync::Arc;
 
-use domains::users::model::{User as User, AUTHORIZATION as USERS_AUTHZ,};
+use domains::{
+    campaigns::model::{
+        Campaign,
+        AUTHORIZATION as CAMPAIGNS_AUTHZ,
+    }, 
+    users::model::{
+        User as User, 
+        AUTHORIZATION as USERS_AUTHZ,
+    }
+};
 
 pub struct Context {
     /// The app config
@@ -41,9 +48,10 @@ impl Context {
         // Set up authorization
         let mut oso = Oso::new();
 
-        // oso.register_class(User::get_polar_class_builder().name("User").build())?;
+        oso.register_class(User::get_polar_class_builder().name("User").build())?;
+        oso.register_class(Campaign::get_polar_class_builder().name("Campaign").build())?;
 
-        // oso.load_str(&USERS_AUTHZ)?;
+        oso.load_str(&[USERS_AUTHZ, CAMPAIGNS_AUTHZ].join("\n"))?;
 
         Ok(Self { 
             config, 

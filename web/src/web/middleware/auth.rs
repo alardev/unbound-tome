@@ -2,7 +2,7 @@ use migration::sea_orm::{ColumnTrait, ActiveModelTrait, Set};
 use async_trait::async_trait;
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
 use axum_login::{tracing::{error, info}, AuthnBackend, UserId};
-use domains::users::{self, model::{self, Entity as User}};
+use domains::users::{self, model::Entity as User};
 use migration::sea_orm::{DatabaseConnection, EntityTrait, QueryFilter};
 use oauth2::{
     basic::{BasicClient, BasicRequestTokenError}, reqwest::{async_http_client, AsyncHttpClientError}, url::Url, AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, TokenResponse, TokenUrl

@@ -34,7 +34,6 @@ figment = { version = "0.10.19", features = ["env", "toml"] }
 once_cell = "*"
 serde_derive = "1.0"
 
-unbound-tome-service = { path = "../service" }
 unbound-tome-utils = { path = "../utils" }
 unbound-tome-domains = { path = "../domains" }
 migration = { path = "../migration" }
