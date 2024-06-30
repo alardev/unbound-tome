@@ -71,6 +71,22 @@ pub struct OAuth {
     pub client: Option<OAuthClient>,
 }
 
+/// Locale config
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Locale {
+    /// Supported languages list
+    pub supported_languages: Vec<String>
+}
+
+impl Default for Locale {
+    fn default() -> Locale {
+        Locale {
+            supported_languages: vec!["en".to_string()]
+        }
+    }
+}
+
+
 /// Application Config
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -84,6 +100,8 @@ pub struct Config {
     pub valkey: Valkey,
     /// Auth config
     pub oauth: OAuth,
+    /// Locale config
+    pub locale: Locale
 }
 
 impl Config {
@@ -117,8 +135,6 @@ impl Config {
             )
             // Serialize and freeze
             .extract()?;
-
-
 
         Ok(config)
     }

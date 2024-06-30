@@ -8,7 +8,7 @@ publish = false
 
 axum = { version = "0.7.5", features = ["macros", "tracing"] }
 axum-login = "0.15"
-axum-extra = "0.9.3"
+axum-extra = { version = "0.9.3", features = ["typed-header"] }
 axum-htmx = {  version = "0.6.0", features = ["serde", "tower", "guards"] }
 miette = { version = "7.2.0", features = ["fancy", "serde"] }
 # axum-template = { version = "2.3.0", features = ["minijinja", "minijinja-autoreload"] }
@@ -34,6 +34,9 @@ figment = { version = "0.10.19", features = ["env", "toml"] }
 once_cell = "*"
 serde_derive = "1.0"
 serde_json = "1.0"
+unic-langid = { version = "*"}
+fluent-templates = "0.9"
+fluent-bundle = "*"
 
 unbound-tome-utils = { path = "../utils" }
 unbound-tome-domains = { path = "../domains" }

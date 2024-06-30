@@ -32,6 +32,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 - Support Helm Charts for Kubernetes deployments
 - Add health check endpoints and a status page
 - Consider supporting Valkey(Redis fork) and OpenTelemetry
+- Support i10n via Project Fluent and fluent-template
 
 
 ## Installation

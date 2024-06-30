@@ -26,3 +26,6 @@ token_url = "https://github.com/login/oauth/access_token"
 [oauth.client]
 id = "client_id"
 secret = "client_secret"
+
+[locale]
+supported_languages = [ "en", "uk" ]

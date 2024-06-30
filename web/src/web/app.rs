@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use axum::Extension;
+use axum::{middleware, Extension};
 use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
 };
@@ -8,6 +8,7 @@ use oso::{Oso, PolarClass};
 use time::Duration;
 use tower_http::trace::{self, TraceLayer};
 use unbound_tome_utils::config::Config;
+use unic_langid::LanguageIdentifier;
 
 use crate::web::{middleware::auth::Backend, routers::{account, auth, health, home, oauth}};
 
@@ -83,6 +84,13 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
     let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
 
+    // Language list
+    //
+    let supported_languages = Arc::new(ctx.config.locale.supported_languages
+        .iter()
+        .filter_map(|lang| lang.parse::<LanguageIdentifier>().ok())
+        .collect::<Vec<LanguageIdentifier>>());
+
     let app = account::router()
         .route_layer(login_required!(Backend, login_url = "/login"))
         .merge(auth::router())
@@ -96,7 +104,9 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
                     .level(Level::DEBUG))
                 .on_response(trace::DefaultOnResponse::new()
                     .level(Level::DEBUG)))
-        .layer(Extension(ctx));
+        .layer(Extension(ctx))
+        .layer(middleware::from_fn_with_state(supported_languages.clone(), crate::web::middleware::i10n::extract_preferred_language));
+
     
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
