@@ -76,7 +76,7 @@ mod post {
                             return (
                                 StatusCode::UNAUTHORIZED,
                                 views::page(views::shell::render(
-                                    None,
+                                    &None,
                                     views::login::render(Some("Invalid credentials".to_string()), None)
                                 ))).into_response()
                         }
@@ -171,7 +171,7 @@ mod post {
                             return (
                                 StatusCode::UNAUTHORIZED,
                                 views::page(views::shell::render(
-                                    None,
+                                    &None,
                                     views::login::render(Some("Invalid credentials".to_string()), None)
                                 ))).into_response()
                         }
@@ -237,7 +237,7 @@ mod get {
         } else {
             //fullpage load
             views::page(views::shell::render(
-                None,
+                &None,
                 views::login::render(None, next)
             ))
         }
@@ -266,7 +266,7 @@ mod get {
         } else {
             //fullpage load
             views::page(views::shell::render(
-                None,
+                &None,
                 views::register::render(None, next)
             ))
         }

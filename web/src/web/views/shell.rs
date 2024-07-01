@@ -4,12 +4,12 @@ use maud::{html, Markup};
 use crate::web::views;
 
 pub fn render(
-    user: std::option::Option<Model>,
+    user: &std::option::Option<Model>,
     draw_content: Markup,
 ) -> Markup {
     html! {
         div id="content" {
-            (views::navbar::render(user))
+            (views::navbar::render(&user))
             div id="tab-content" 
             role="tabpanel" 
             class="container bg-slate-50/5 mx-auto 

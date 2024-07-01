@@ -18,7 +18,9 @@ debug = false
 url = "localhost:6379"
 
 [oauth]
+#required
 enabled = true
+#optional if disabled
 url = "https://github.com/login/oauth/authorize"
 audience = "localhost"
 token_url = "https://github.com/login/oauth/access_token"

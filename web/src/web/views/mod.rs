@@ -1,3 +1,5 @@
+use axum_login::tracing::debug;
+use domains::users::model::Model;
 use maud::{html, Markup};
 
 pub mod shell;
@@ -44,5 +46,28 @@ pub fn page(body: Markup) -> Markup {
                 (body)
             }
         }
+    }
+}
+
+///Render a full page or a partial if the request is made with HTMX.
+pub fn determine_view(hx_request: bool, userdata: &std::option::Option<Model>, body: Markup) -> Markup {
+    if hx_request {
+        debug!("PARTIAL");
+        //partial hx-request
+        shell::render(
+            &userdata,
+            html!(
+                (body)
+            )
+        )
+    } else {
+        debug!("FULL");
+        //fullpage load
+        page(shell::render(
+            &userdata,
+            html!(
+                (body)
+            )
+        ))
     }
 }

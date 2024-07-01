@@ -2,7 +2,7 @@ use domains::users::model::Model;
 use maud::{html, Markup};
 
 pub fn render(
-    user: std::option::Option<Model>,
+    user: &std::option::Option<Model>,
 ) -> Markup {
     html! {
         main {

@@ -17,6 +17,7 @@ mod get {
     use axum::Extension;
     use fluent_bundle::FluentValue;
     use unic_langid::langid;
+    use views::determine_view;
 
     use crate::web::middleware::i10n::PreferredLanguage;
 
@@ -37,31 +38,21 @@ mod get {
             map.insert(String::from("case"), FluentValue::from("vocative"));
             map
         };
-    
 
-        if hx_request {
-            //partial hx-request
-            views::shell::render(
-                auth_session.user,
-                html!(
-                    p { 
-                        (LOCALES.lookup_with_args(&preferred_language.unwrap(), "home-greeting", &args))
-                    }
-                    p { 
-                        (LOCALES.lookup_with_args(&langid!("uk"), "home-greeting", &args))
-                        (LOCALES.lookup_with_args(&langid!("uk"), "case-lol", &args)) 
-                    }
-                )
+        let hometext = LOCALES
+            .lookup_with_args(
+                &preferred_language.unwrap_or(langid!("en")), 
+                "home-greeting", &args
+        );
+
+        determine_view(
+            hx_request,
+            &auth_session.user,
+            html!(
+                p { 
+                    (hometext)
+                }
             )
-        } else {
-            //fullpage load
-            views::page(views::shell::render(
-                auth_session.user,
-                html!(
-                    p { (LOCALES.lookup(&preferred_language.unwrap(), "hello-world")) }
-                    p { (LOCALES.lookup(&langid!("uk"), "hello-world")) }
-                )
-            ))
-        }
+        )
     }
 }
