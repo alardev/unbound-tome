@@ -8,15 +8,17 @@ pub fn render(
     draw_content: Markup,
 ) -> Markup {
     html! {
-        div id="content" {
+        div 
+        class="flex h-screen flex-col"
+        id="content" {
             (views::navbar::render(&user))
             div id="tab-content" 
             role="tabpanel" 
-            class="container bg-slate-50/5 mx-auto 
-            max-w-2xl mt-10 p-5 rounded-lg"
+            class="bg-base-200 flex flex-1"
             {
                 (draw_content)
             }
+            (views::footer::render())
         }
     }
 }

@@ -1,6 +1,6 @@
 #![forbid(unsafe_code)]
 
-use axum::{middleware, Extension};
+use axum::{ middleware, Extension, Router};
 use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
 };
@@ -10,7 +10,7 @@ use tower_http::trace::{self, TraceLayer};
 use unbound_tome_utils::config::Config;
 use unic_langid::LanguageIdentifier;
 
-use crate::web::{middleware::auth::Backend, routers::{account, auth, health, home}};
+use crate::web::{middleware::auth::Backend, routers::{account, assets, auth, health, home}};
 
 use migration::{sea_orm::{Database, DatabaseConnection}, Migrator, MigratorTrait};
 use std::sync::Arc;
@@ -91,20 +91,24 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
         .filter_map(|lang| lang.parse::<LanguageIdentifier>().ok())
         .collect::<Vec<LanguageIdentifier>>());
 
-    let app = account::router()
-        .route_layer(login_required!(Backend, login_url = "/login"))
-        .merge(auth::router(ctx.config.oauth.enabled))
-        .merge(home::router())
-        .merge(health::router())
-        .layer(auth_layer)
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(trace::DefaultMakeSpan::new()
-                    .level(Level::DEBUG))
-                .on_response(trace::DefaultOnResponse::new()
-                    .level(Level::DEBUG)))
-        .layer(Extension(ctx))
-        .layer(middleware::from_fn_with_state(supported_languages.clone(), crate::web::middleware::i10n::extract_preferred_language));
+
+    let app = Router::new()
+            .merge(account::router())
+            .route_layer(login_required!(Backend, login_url = "/login"))
+            .merge(auth::router(ctx.config.oauth.enabled))
+            .merge(home::router())
+            .merge(health::router())
+            .merge(assets::router())
+            .layer(auth_layer)
+            .layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(trace::DefaultMakeSpan::new()
+                        .level(Level::DEBUG))
+                    .on_response(trace::DefaultOnResponse::new()
+                        .level(Level::DEBUG)))
+            .layer(Extension(ctx.config))
+            .layer(Extension(ctx))
+            .layer(middleware::from_fn_with_state(supported_languages.clone(), crate::web::middleware::i10n::extract_preferred_language));
 
     
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

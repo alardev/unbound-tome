@@ -1,4 +1,5 @@
 hello-world = Hello World!
-home-greeting = Hello { $name }!
-
-account-page-title = Account
+home-title = Hello { $name }!
+home-hero-title = It's your World! Your reality!
+home-hero-text = Create wonderful new campaigns and enjoy DnD with your friends just the way you wanted!
+home-hero-btn = Join Now!

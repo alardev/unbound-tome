@@ -101,7 +101,9 @@ pub struct Config {
     /// Auth config
     pub oauth: OAuth,
     /// Locale config
-    pub locale: Locale
+    pub locale: Locale,
+    /// Assets config
+    pub assets_path: String
 }
 
 impl Config {

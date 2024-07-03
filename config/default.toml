@@ -2,6 +2,7 @@
 
 run_mode = "development"
 port = 3000
+assets_path = "assets"
 
 [database]
 hostname = "localhost"
@@ -12,7 +13,10 @@ port = 5432
 url = "postgresql://unboundtome:changeme@localhost:5432/unbound_tome_development"
 debug = false
 
+
 [database.pool]
+
+
 
 [valkey]
 url = "localhost:6379"

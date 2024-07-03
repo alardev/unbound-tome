@@ -1,9 +1,13 @@
+use std::collections::HashMap;
+
 use axum::{response::IntoResponse, routing::get, Router};
 use axum_htmx::HxRequest;
+use fluent_bundle::FluentValue;
+use fluent_templates::Loader;
 use maud::html;
+use unic_langid::{langid, LanguageIdentifier};
 use crate::web::{
-    views,
-    middleware::auth::AuthSession
+    middleware::{auth::AuthSession, i10n::LOCALES}, views
 };
 
 pub fn router() -> Router<()> {
@@ -16,11 +20,9 @@ mod get {
 
     use axum::Extension;
     use fluent_bundle::FluentValue;
-    use fluent_templates::Loader;
-    use unic_langid::langid;
     use views::determine_view;
 
-    use crate::web::middleware::i10n::{PreferredLanguage, LOCALES};
+    use crate::web::middleware::i10n::PreferredLanguage;
 
     use super::*;
 
@@ -38,20 +40,38 @@ mod get {
             map
         };
         
-        let account_page_title = LOCALES
-            .lookup_with_args(
-                &preferred_language.unwrap_or(langid!("en")), 
-                "account-page-title", &args
-        );
-
         determine_view(
             hx_request,
             &auth_session.user,
             html!(
 
-                (account_page_title)
-            
+                h1 class="text-2xl font-semibold" { (get_message(preferred_language, "acc-title".to_string())) }
+                div class="flex items-center" {
+                    hr class="flex-grow border-t border-accent" {}
+                } 
             )
         )
     }
+}
+
+fn get_message(
+    preferred_language: Option<LanguageIdentifier>, 
+    key: String
+) -> String {
+    LOCALES.lookup(
+        &preferred_language.unwrap_or(langid!("en")), 
+        &key,
+    )
+}
+
+fn get_message_args(
+    preferred_language: Option<LanguageIdentifier>, 
+    key: String, 
+    args: HashMap<String, FluentValue>
+) -> String {
+    LOCALES.lookup_with_args(
+        &preferred_language.unwrap_or(langid!("en")), 
+        &key,
+        &args
+    )
 }

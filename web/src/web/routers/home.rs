@@ -39,18 +39,52 @@ mod get {
             map
         };
 
+        let hometitle = LOCALES
+            .lookup_with_args(
+                &preferred_language.as_ref().unwrap_or(&langid!("en")), 
+                "home-hero-title", &args
+        );
         let hometext = LOCALES
             .lookup_with_args(
-                &preferred_language.unwrap_or(langid!("en")), 
-                "home-greeting", &args
+                &preferred_language.as_ref().unwrap_or(&langid!("en")), 
+                "home-hero-text", &args
+        );
+
+        let homebtn = LOCALES
+        .lookup_with_args(
+            &preferred_language.as_ref().unwrap_or(&langid!("en")), 
+            "home-hero-btn", &args
         );
 
         determine_view(
             hx_request,
             &auth_session.user,
             html!(
-                p { 
-                    (hometext)
+                div class="hero bg-base-200 flex-1"
+                style="background-image: url(https://i.etsystatic.com/18572829/r/il/bfb63e/4985394714/il_1140xN.4985394714_m67f.jpg);"
+                {
+                    div class="hero-content flex-col lg:flex-row-reverse" {
+                        div class="card lg:card-side lg:w-5/6 glass shadow-xl text-white" {
+                            div class="card-body" {
+                                h1 class="text-5xl card-title font-bold" {
+                                    (hometitle)
+                                }
+                                p class="text-2xl py-6" {
+                                    (hometext)
+                                }
+                                div class="card-actions justify-center" {
+                                    button class="btn btn-primary" {
+                                        (homebtn)
+                                    }
+                                }
+                            }
+                            figure {
+                                img src="https://i.pinimg.com/originals/d5/98/46/d59846b06d0dd2a415c07af101aaf055.png"
+                                class="max-w-sm rounded-lg shadow-2xl"
+                                {}
+                            }
+                        }
+                    }
                 }
             )
         )
