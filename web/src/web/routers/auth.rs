@@ -99,7 +99,7 @@ mod post {
                 // Redirect::to(next).into_response()
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", next)
+                    .header("HX-Location", format!("{{\"path\":\"{}\", \"target\":\"#tab-content\"}}", "/"))
                     .body(Body::empty())
                     .unwrap();
                 return res
@@ -107,7 +107,7 @@ mod post {
                 // Redirect::to("/").into_response()
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", "/")
+                    .header("HX-Location", "{\"path\":\"/\", \"target\":\"#tab-content\"}")
                     .body(Body::empty())
                     .unwrap();
                 return res
@@ -194,7 +194,7 @@ mod post {
                 // Redirect::to(next).into_response()
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", next)
+                    .header("HX-Location", format!("{{\"path\":\"{}\", \"target\":\"#tab-content\"}}", next))
                     .body(Body::empty())
                     .unwrap();
                 return res
@@ -202,7 +202,7 @@ mod post {
                 // Redirect::to("/").into_response()
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", "/")
+                    .header("HX-Location", "{\"path\":\"/\", \"target\":\"#tab-content\"}")
                     .body(Body::empty())
                     .unwrap();
                 return res
@@ -248,7 +248,7 @@ mod get {
             Ok(_) => {
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", "/")
+                    .header("HX-Location", "{\"path\":\"/\", \"target\":\"#tab-content\"}")
                     .body(Body::empty())
                     .unwrap();
                 return res

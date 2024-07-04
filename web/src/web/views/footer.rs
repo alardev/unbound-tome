@@ -1,5 +1,4 @@
 use chrono::{Datelike, Utc};
-use domains::users::model::Model;
 use fluent_templates::FluentLoader;
 use maud::{html, Markup};
 
@@ -7,8 +6,6 @@ use crate::web::middleware::i10n::LOCALES;
 
 pub fn render(
 ) -> Markup {
-    let i10n = FluentLoader::new(&*LOCALES);
-
     html! {
         footer class="footer bg-neutral text-neutral-content items-center p-4" {
             aside class="grid-flow-col items-center" {

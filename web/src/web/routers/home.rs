@@ -60,8 +60,7 @@ mod get {
             hx_request,
             &auth_session.user,
             html!(
-                div class="hero bg-base-200 flex-1"
-                style="background-image: url(https://i.etsystatic.com/18572829/r/il/bfb63e/4985394714/il_1140xN.4985394714_m67f.jpg);"
+                div class="hero bg-base-200/0 flex-1"
                 {
                     div class="hero-content flex-col lg:flex-row-reverse" {
                         div class="card lg:card-side lg:w-5/6 glass shadow-xl text-white" {
