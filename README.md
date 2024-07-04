@@ -8,7 +8,7 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 - Axum
 - Axum-login
 - SeaORM w/ Postgres
-- Tailwind
+- Tailwind + DaisyUI
 - HTMX
 - Maud
 - Oso
@@ -38,30 +38,37 @@ Initial milestone is aimed at supporting creation of DnD 5e campaigns and charac
 ## Installation
 ### Built using rust stable branch.
 
-1. Install sea-orm-cli.
+__NB!__ Requires Bun (NPM alternative) to be installed.
+
+1. Install Bun dependencies.
+   ```bash
+   bun install
+   ```
+   
+2. Install sea-orm-cli.
     ```bash
     cargo install sea-orm-cli
     ```
 
-2. Modify the configuration toml's in the config directory.
+3. Modify the configuration toml's in the config directory.
 
-3. Initialize the postgres container.
+4. Initialize the postgres container.
     ```bash
     docker compose -f dockercompose.yml up -d
     ```
-4. Run migrations.
+5. Run migrations.
     ```bash
     sea-orm-cli migrate fresh
     ```
 
 ### Development
-5. Start The development server.
+6. Start The development server.
     ```bash
     cargo watch -x run
     ```
 
 ### Production
-5. Build the production binary.
+6. Build the production binary.
     ```bash
     cargo build --release
     ```
