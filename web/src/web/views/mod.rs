@@ -7,6 +7,7 @@ pub mod navbar;
 pub mod login;
 pub mod register;
 pub mod footer;
+pub mod home;
 
 pub fn page(body: Markup) -> Markup {
     html! {

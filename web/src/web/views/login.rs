@@ -1,3 +1,4 @@
+use axum::Extension;
 use maud::{html, Markup};
 
 pub fn render(
@@ -53,7 +54,8 @@ pub fn render(
                 rounded"
                 hx-post="/login/password"
                 hx-target-error="#login-errors"
-                hx-target="#tab-content" {
+                hx-target="#tab-content" 
+                {
                     "Sign In"
                 }
                 @if next.is_some() { 

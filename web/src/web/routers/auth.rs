@@ -45,7 +45,9 @@ mod post {
     use super::*;
 
     pub(super) mod login {
-        use axum::body::Body;
+        use std::ops::Deref;
+
+        use axum::body::{self, Body};
         use axum_htmx::HxRequest;
         use http::Response;
         use maud::html;
@@ -95,20 +97,26 @@ mod post {
                 return response
             }
 
+            let (parts, body) = html!(div id="navbar" hx-swap-oob="outerHTML" { }).into_response().into_parts();
+
             if let Some(ref next) = creds.next {
                 // Redirect::to(next).into_response()
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", format!("{{\"path\":\"{}\", \"target\":\"#tab-content\"}}", "/"))
-                    .body(Body::empty())
+                    .header("HX-Location", 
+                    format!("{{\"path\":\"{}\", \"target\":\"#tab-content\", \"headers\":{{\"username\": \"{}\"}}}}", next, creds.username))
+                    .header("Content-Type", "text/html; charset=utf-8")
+                    .body(body)
                     .unwrap();
                 return res
             } else {
                 // Redirect::to("/").into_response()
                 let res = Response::builder()
                     .status(200)
-                    .header("HX-Location", "{\"path\":\"/\", \"target\":\"#tab-content\"}")
-                    .body(Body::empty())
+                    .header("HX-Location", 
+                    format!("{{\"path\":\"{}\", \"target\":\"#tab-content\", \"headers\":{{\"username\": \"{}\"}}}}", "/", creds.username))
+                    .header("Content-Type", "text/html; charset=utf-8")
+                    .body(body)
                     .unwrap();
                 return res
             }

@@ -13,7 +13,7 @@ pub fn render(
     let login = "Login";
 
     html! {
-        div class="navbar bg-base-100" {
+        div id="navbar" class="navbar bg-base-100" {
             div class="flex-1" {
                 a class="btn btn-ghost text-xl" {
                     img class="w-10 fill-white" src="/static/logo.svg" {}
@@ -46,7 +46,7 @@ pub fn render(
                         {}
                     }
                 }
-                div class="dropdown dropdown-end" 
+                div id="navbarlogin" class="dropdown dropdown-end" 
                 {
                     @if user.is_some() {
 
