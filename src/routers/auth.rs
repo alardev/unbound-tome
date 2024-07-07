@@ -5,7 +5,7 @@ use axum_login::tower_sessions::Session;
 use oauth2::CsrfToken;
 use serde::Deserialize;
 
-use crate::web::middleware::auth::AuthSession;
+use crate::middleware::auth::AuthSession;
 
 pub const NEXT_URL_KEY: &str = "auth.next-url";
 
@@ -45,20 +45,16 @@ mod post {
     use super::*;
 
     pub(super) mod login {
-        use std::ops::Deref;
-
-        use axum::body::{self, Body};
-        use axum_htmx::HxRequest;
         use http::Response;
         use maud::html;
+        use serde_json::json;
         
 
         use super::*;
-        use crate::{web::middleware::auth::{Credentials, PasswordCreds}, web::views};
+        use crate::{middleware::auth::{Credentials, PasswordCreds}, views};
 
         pub async fn password(
             mut auth_session: AuthSession,
-            HxRequest(hx_request): HxRequest,
             Form(creds): Form<PasswordCreds>,
         ) -> impl IntoResponse {
             let user = match auth_session
@@ -66,60 +62,52 @@ mod post {
                 .await
             {
                 Ok(Some(user)) => user,
-                Ok(None) => {
-                    match hx_request {
-                        true => {
-                            return (
+                Ok(None) => return (
                                 StatusCode::UNAUTHORIZED,
-                                html! { ("Invalid credentials".to_string())
-                                }).into_response()
-                        },
-                        false => {
-                            return (
-                                StatusCode::UNAUTHORIZED,
-                                views::page(views::shell::render(
-                                    &None,
-                                    views::login::render(Some("Invalid credentials".to_string()), None)
-                                ))).into_response()
-                        }
-                    }
-                }
+                                "Invalid credentials".to_string().into_response()
+                            ),
                 Err(_) => {
-                    let mut response = html! {("Something went wrong! Internal Server Error 500!")}.into_response();
-                    *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                    return response
+                    let mut response = "Something went wrong! Internal Server Error 500!".into_response();
+                    return (StatusCode::INTERNAL_SERVER_ERROR, response)
                 },
             };
 
             if auth_session.login(&user).await.is_err() {
                 let mut response = html! {("Something went wrong! Internal Server Error 500!")}.into_response();
-                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                return response
+                return (StatusCode::INTERNAL_SERVER_ERROR, response)
             }
 
-            let (parts, body) = html!(div id="navbar" hx-swap-oob="outerHTML" { }).into_response().into_parts();
+            // let (_parts, body) = html!((views::navbar::render_logout_button(creds.username))).into_response().into_parts();
 
-            if let Some(ref next) = creds.next {
-                // Redirect::to(next).into_response()
-                let res = Response::builder()
-                    .status(200)
-                    .header("HX-Location", 
-                    format!("{{\"path\":\"{}\", \"target\":\"#tab-content\", \"headers\":{{\"username\": \"{}\"}}}}", next, creds.username))
-                    .header("Content-Type", "text/html; charset=utf-8")
-                    .body(body)
-                    .unwrap();
-                return res
-            } else {
-                // Redirect::to("/").into_response()
-                let res = Response::builder()
-                    .status(200)
-                    .header("HX-Location", 
-                    format!("{{\"path\":\"{}\", \"target\":\"#tab-content\", \"headers\":{{\"username\": \"{}\"}}}}", "/", creds.username))
-                    .header("Content-Type", "text/html; charset=utf-8")
-                    .body(body)
-                    .unwrap();
-                return res
-            }
+            // if let Some(ref next) = creds.next {
+            //     let res = Response::builder()
+            //         .status(200)
+            //         .header("HX-Location",
+            //             json!({
+            //                 "path": next,
+            //                 "target": "#tab-content",
+            //             }).to_string()
+            //         )
+            //         .header("Content-Type", "text/html; charset=utf-8")
+            //         .body(body)
+            //         .unwrap();
+            //     return res
+            // } else {
+            //     let res = Response::builder()
+            //         .status(200)
+            //         .header("HX-Location", 
+            //     json!({
+            //                 "path": "/",
+            //                 "target": "#tab-content",
+            //             }).to_string()
+            //         )
+            //         .header("Content-Type", "text/html; charset=utf-8")
+            //         .body(body)
+            //         .unwrap();
+            //     return res
+            // }
+
+            (StatusCode::OK ,"lmao".into_response())
         }
 
         pub async fn oauth(
@@ -145,17 +133,14 @@ mod post {
 
     pub(super) mod register {
         use axum::body::Body;
-        use axum_htmx::HxRequest;
         use http::Response;
-        use maud::html;
 
         use super::*;
-        use crate::web::{middleware::auth::{Credentials, PasswordCreds}, views};
+        use crate::{middleware::auth::{Credentials, PasswordCreds}, views};
 
 
         pub async fn password(
             mut auth_session: AuthSession,
-            HxRequest(hx_request): HxRequest,
             Form(creds): Form<PasswordCreds>,
             // Extension(ctx): Extension<Context>,
         ) -> impl IntoResponse {
@@ -167,68 +152,52 @@ mod post {
                 .await
             {
                 Ok(Some(user)) => user,
-                Ok(None) => {
-                    match hx_request {
-                        true => {
-                            return (
+                Ok(None) => return (
                                 StatusCode::UNAUTHORIZED,
-                                html! { ("Invalid credentials".to_string())
-                                }).into_response()
-                        },
-                        false => {
-                            return (
-                                StatusCode::UNAUTHORIZED,
-                                views::page(views::shell::render(
-                                    &None,
-                                    views::login::render(Some("Invalid credentials".to_string()), None)
-                                ))).into_response()
-                        }
-                    }
-                }
+                                "Invalid credentials".to_string().into_response()),
                 Err(_) => {
-                    let mut response = html! {("Something went wrong! Internal Server Error 500!")}.into_response();
-                    *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                    return response
+                    let mut response = "Something went wrong! Internal Server Error 500!".into_response();
+                    return (StatusCode::INTERNAL_SERVER_ERROR, response)
                 },
             };
 
             if auth_session.login(&user).await.is_err() {
-                let mut response = html! {("Something went wrong! Internal Server Error 500!")}.into_response();
-                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                return response
+                let mut response = "Something went wrong! Internal Server Error 500!".into_response();
+                return (StatusCode::INTERNAL_SERVER_ERROR, response)
             }
 
-            if let Some(ref next) = creds.next {
-                // Redirect::to(next).into_response()
-                let res = Response::builder()
-                    .status(200)
-                    .header("HX-Location", format!("{{\"path\":\"{}\", \"target\":\"#tab-content\"}}", next))
-                    .body(Body::empty())
-                    .unwrap();
-                return res
-            } else {
-                // Redirect::to("/").into_response()
-                let res = Response::builder()
-                    .status(200)
-                    .header("HX-Location", "{\"path\":\"/\", \"target\":\"#tab-content\"}")
-                    .body(Body::empty())
-                    .unwrap();
-                return res
-            }
+            // if let Some(ref next) = creds.next {
+            //     // Redirect::to(next).into_response()
+            //     let res = Response::builder()
+            //         .status(200)
+            //         .header("HX-Location", format!("{{\"path\":\"{}\", \"target\":\"#tab-content\"}}", next))
+            //         .body(Body::empty())
+            //         .unwrap();
+            //     return res
+            // } else {
+            //     // Redirect::to("/").into_response()
+            //     let res = Response::builder()
+            //         .status(200)
+            //         .header("HX-Location", "{\"path\":\"/\", \"target\":\"#tab-content\"}")
+            //         .body(Body::empty())
+            //         .unwrap();
+            //     return res
+            // }
+
+            (StatusCode::OK ,"lmaoooooo".into_response())
+
         }
     }
 }
 
 mod get {
     use axum::body::Body;
-    use axum_htmx::HxRequest;
     use http::Response;
-    use maud::html;
 
-    use crate::web::middleware::auth::OAuthCreds;
-    use crate::web::views;
+    use crate::middleware::auth::OAuthCreds;
+    use crate::views;
 
-    use crate::web::{
+    use crate::{
         routers::auth::NEXT_URL_KEY,
         middleware::auth::{AuthSession, Credentials},
     };
@@ -237,18 +206,8 @@ mod get {
     use super::*;
 
     pub async fn login(
-        HxRequest(hx_request): HxRequest,
         Query(NextUrl { next }): Query<NextUrl>) -> impl IntoResponse {
-        if hx_request {
-            //partial hx-request
             views::login::render(None, next)
-        } else {
-            //fullpage load
-            views::page(views::shell::render(
-                &None,
-                views::login::render(None, next)
-            ))
-        }
     }
 
     pub async fn logout(mut auth_session: AuthSession) -> impl IntoResponse {
@@ -266,18 +225,8 @@ mod get {
     }
 
     pub async fn register(
-        HxRequest(hx_request): HxRequest,
         Query(NextUrl { next }): Query<NextUrl>) -> impl IntoResponse {
-        if hx_request {
-            //partial hx-request
             views::register::render(None, next)
-        } else {
-            //fullpage load
-            views::page(views::shell::render(
-                &None,
-                views::register::render(None, next)
-            ))
-        }
     }
 
     pub async fn callback(
@@ -303,10 +252,8 @@ mod get {
             Ok(None) => {
                 return (
                     StatusCode::UNAUTHORIZED,
-                    html! { 
-                        ("Invalid credentials"
-                            .to_string())
-                    }
+                        "Invalid credentials"
+                            .to_string()
                 )
                     .into_response()
             }

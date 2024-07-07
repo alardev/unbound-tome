@@ -1,7 +1,7 @@
 use domains::users::model::Model;
 use maud::{html, Markup};
 
-use crate::web::views;
+use crate::views;
 
 pub fn render(
     user: &std::option::Option<Model>,

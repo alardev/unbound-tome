@@ -1,5 +1,8 @@
 #![forbid(unsafe_code)]
 
+use dioxus::prelude::*;
+use dioxus_fullstack::prelude::*;
+
 use axum::{ middleware, Extension, Router};
 use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
@@ -10,10 +13,14 @@ use tower_http::trace::{self, TraceLayer};
 use unbound_tome_utils::config::Config;
 use unic_langid::LanguageIdentifier;
 
-use crate::web::{middleware::auth::Backend, routers::{account, assets, auth, health, home}};
+use crate::middleware::auth::Backend;
+
+use crate::routers::{account, assets, auth, health, home};
 
 use migration::{sea_orm::{Database, DatabaseConnection}, Migrator, MigratorTrait};
 use std::sync::Arc;
+
+use crate::shared::App;
 
 use domains::{
     campaigns::model::{
@@ -93,13 +100,14 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
 
 
     let app = Router::new()
+            .serve_dioxus_application(ServeConfig::builder().build(), || VirtualDom::new(App)).await
             .merge(account::router())
-            .route_layer(login_required!(Backend, login_url = "/login"))
+            // .route_layer(login_required!(Backend, login_url = "/login"))
             .merge(auth::router(ctx.config.oauth.enabled))
-            .merge(home::router())
+            // .merge(home::router())
             .merge(health::router())
-            .merge(assets::router())
-            .layer(auth_layer)
+            // .merge(assets::router())
+            // .layer(auth_layer)
             .layer(
                 TraceLayer::new_for_http()
                     .make_span_with(trace::DefaultMakeSpan::new()
@@ -108,11 +116,11 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
                         .level(Level::DEBUG)))
             .layer(Extension(ctx.config))
             .layer(Extension(ctx))
-            .layer(middleware::from_fn_with_state(supported_languages.clone(), crate::web::middleware::i10n::extract_preferred_language));
+            .layer(middleware::from_fn_with_state(supported_languages.clone(), crate::middleware::i10n::extract_preferred_language));
 
     
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    tracing::debug!("listening on {}", listener.local_addr().unwrap());
+    tracing::info!("Axum listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app.into_make_service()).await?;
     Ok(())
 }

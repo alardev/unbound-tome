@@ -1,7 +1,7 @@
 use chrono::{Datelike, Utc};
 use maud::{html, Markup};
 
-use crate::web::middleware::i10n::LOCALES;
+use crate::middleware::i10n::LOCALES;
 
 pub fn render(
 ) -> Markup {

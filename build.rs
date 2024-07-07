@@ -6,7 +6,7 @@ fn main() {
         .arg("-i")
         .arg("./styles/input.css")
         .arg("-o")
-        .arg("./assets/output.css")
+        .arg("./assets/tailwind.css")
         .arg("--minify")
         .output()
         .expect("failed to generate styles!");

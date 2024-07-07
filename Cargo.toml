@@ -2,11 +2,100 @@
 name = "unbound-tome"
 version = "0.1.0"
 edition = "2021"
+authors = ["alardev <alar.okas@protonmail.com>"]
 publish = false
 build = "build.rs"
 
 [workspace]
-members = [".", "web", "domains", "migration", "utils"]
+members = [".", "domains", "migration", "utils"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-unbound-tome-web = { path = "web" }
+serde = { version = "1.0.204", features = ["derive"] }
+dioxus = { version = "0.5.1", features = ["fullstack", "router"] }
+dioxus-fullstack = { version = "*", optional = true }
+axum = { version = "0.7.5", features = ["macros", "tracing"], optional = true }
+tokio = { version = "1.38.0", features = ["full"], optional = true }
+axum-login = { version = "0.15", optional = true }
+axum-extra = { version = "0.9.3", features = ["typed-header"], optional = true }
+axum-htmx = {  version = "0.6.0", features = ["serde", "tower", "guards"], optional = true }
+miette = { version = "7.2.0", features = ["fancy", "serde"], optional = true }
+
+# tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+async-trait = { version = "0.1.80", optional = true }
+oauth2 = { version = "4.4.2", optional = true }
+hyper = { version = "1.3.1", optional = true }
+http = { version = "1.1.0", optional = true }
+dotenvy = { version = "0.15.7", optional = true }
+reqwest = { version = "0.12.5", default-features = false, features = ["rustls-tls", "json"], optional = true}
+time = { version = "0.3.36", optional = true }
+tower = { version = "0.4.13", optional = true }
+tower-http = { version = "0.5.2", features = ["fs", "trace"], optional = true}
+password-auth = { version = "1.0.0", optional = true}
+thiserror = { version = "1.0.61", optional = true }
+#sqlx = { version = "0.7.4", features = ["postgres", "time", "runtime-tokio", "json", "uuid"] }
+uuid = { version = "1.9.1", features = ["serde", "v4"], optional = true}
+maud = { version = "*", features = ["axum"], optional = true}
+oso = { version = "*", optional = true }
+figment = { version = "0.10.19", features = ["env", "toml"], optional = true }
+once_cell = { version = "*", optional = true }
+serde_derive = { version = "1.0.203", optional = true}
+serde_json = { version = "1.0.120", optional = true }
+unic-langid = { version = "*", optional = true}
+fluent-templates = { version = "0.9", optional = true }
+fluent-bundle = { version = "*", optional = true }
+chrono = { version = "0.4", optional = true }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"], optional = true}
+
+unbound-tome-utils = { path = "utils", optional = true }
+unbound-tome-domains = { path = "domains", optional = true }
+migration = { path = "migration", optional = true }
+
+# Debug
+tracing = "0.1.37"
+dioxus-logger = "0.5.1"
+
+# WebAssembly Debug
+wasm-logger = "0.2.0"
+console_error_panic_hook = "0.1.7"
+
+
+[features]
+default = []
+web = ["dioxus/web"]
+server = [
+    "axum", 
+    "axum-extra",
+    "axum-login",
+    "dioxus/axum", 
+    "unbound-tome-utils",
+    "tokio",
+    "dioxus-fullstack/axum",
+    "tower-http",
+    "unbound-tome-domains",
+    "migration",
+    "async-trait",
+    "http",
+    "tower",
+    "reqwest",
+    "chrono",
+    "uuid",
+    "time",
+    "oso",
+    "password-auth",
+    "figment",
+    "hyper",
+    "unic-langid",
+    "fluent-bundle",
+    "fluent-templates",
+    "maud",
+    "dotenvy",
+    "tower-http",
+    "oauth2",
+    "serde_derive",
+    "serde_json",
+    "once_cell",
+    "thiserror",
+    "tracing-subscriber"
+    ]

@@ -1,12 +1,10 @@
 use std::collections::HashMap;
 
 use axum::{response::IntoResponse, routing::get, Router};
-use axum_htmx::HxRequest;
 use fluent_bundle::FluentValue;
 use fluent_templates::Loader;
-use maud::html;
 use unic_langid::{langid, LanguageIdentifier};
-use crate::web::{
+use crate::{
     middleware::{auth::AuthSession, i10n::LOCALES}, views
 };
 
@@ -22,12 +20,11 @@ mod get {
     use fluent_bundle::FluentValue;
     use views::determine_view;
 
-    use crate::web::middleware::i10n::PreferredLanguage;
+    use crate::middleware::i10n::PreferredLanguage;
 
     use super::*;
 
     pub async fn account(
-        HxRequest(hx_request): HxRequest,
         auth_session: AuthSession,
         Extension(PreferredLanguage(preferred_language)): Extension<PreferredLanguage>,
     ) -> impl IntoResponse {
@@ -40,17 +37,11 @@ mod get {
             map
         };
         
-        determine_view(
-            hx_request,
-            &auth_session.user,
-            html!(
-
-                h1 class="text-2xl font-semibold" { (get_message(preferred_language, "acc-title".to_string())) }
-                div class="flex items-center" {
-                    hr class="flex-grow border-t border-accent" {}
-                } 
-            )
-        )
+        // determine_view(
+        //     hx_request,
+        //     &auth_session.user,
+        //     )
+        
     }
 }
 
