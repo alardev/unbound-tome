@@ -15,7 +15,7 @@ use unic_langid::LanguageIdentifier;
 
 use crate::middleware::auth::Backend;
 
-use crate::routers::{account, assets, auth, health, home};
+use crate::routers::{account, assets, auth, health};
 
 use migration::{sea_orm::{Database, DatabaseConnection}, Migrator, MigratorTrait};
 use std::sync::Arc;

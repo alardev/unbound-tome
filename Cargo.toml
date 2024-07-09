@@ -13,7 +13,7 @@ members = [".", "domains", "migration", "utils"]
 
 [dependencies]
 serde = { version = "1.0.204", features = ["derive"] }
-dioxus = { version = "0.5.1", features = ["fullstack", "router"] }
+dioxus = { version = "0.5.1", features = ["fullstack", "router", "html"] }
 dioxus-fullstack = { version = "*", optional = true }
 axum = { version = "0.7.5", features = ["macros", "tracing"], optional = true }
 tokio = { version = "1.38.0", features = ["full"], optional = true }

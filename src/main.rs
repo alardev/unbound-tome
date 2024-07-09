@@ -2,8 +2,6 @@
 #![forbid(unsafe_code)]
 
 use dioxus::prelude::*;
-pub mod shared;
-
 
 use tracing::Level;
 
@@ -24,6 +22,8 @@ pub mod routers;
 
 #[cfg(feature = "server")]
 pub mod views;
+
+pub mod shared;
 
 pub fn main() {
     // Init logger
