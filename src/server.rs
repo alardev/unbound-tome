@@ -106,7 +106,7 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
             .merge(auth::router(ctx.config.oauth.enabled))
             // .merge(home::router())
             .merge(health::router())
-            // .merge(assets::router())
+            .merge(assets::router())
             // .layer(auth_layer)
             .layer(
                 TraceLayer::new_for_http()
