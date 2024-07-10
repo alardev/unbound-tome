@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![forbid(unsafe_code)]
 
+#[allow(unused_imports)]
 use dioxus::prelude::*;
 
 use tracing::Level;
@@ -14,16 +15,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 #[cfg(feature = "server")]
 pub mod server;
 
-#[cfg(feature = "server")]
-pub mod middleware;
-
-#[cfg(feature = "server")]
-pub mod routers;
-
-#[cfg(feature = "server")]
-pub mod views;
-
-pub mod shared;
+pub mod webapp;
 
 pub fn main() {
     // Init logger
@@ -37,7 +29,7 @@ pub fn main() {
     // Hydrate the application on the client
     #[cfg(feature = "web")]
     {
-        dioxus::web::launch::launch_cfg(shared::App, dioxus::web::Config::new().hydrate(true));
+        dioxus::web::launch::launch_cfg(webapp::App, dioxus::web::Config::new().hydrate(true));
     }
 
     #[cfg(feature = "server")]

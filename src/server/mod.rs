@@ -1,5 +1,8 @@
 #![forbid(unsafe_code)]
 
+pub mod routers;
+pub mod middlewares;
+
 use dioxus::prelude::*;
 use dioxus_fullstack::prelude::*;
 
@@ -13,14 +16,20 @@ use tower_http::trace::{self, TraceLayer};
 use unbound_tome_utils::config::Config;
 use unic_langid::LanguageIdentifier;
 
-use crate::middleware::auth::Backend;
+// use middleware::auth::Backend;
 
-use crate::routers::{account, assets, auth, health};
+use routers::{
+    assets, 
+    // auth, 
+    health,
+};
+
+use middlewares::i10n;
 
 use migration::{sea_orm::{Database, DatabaseConnection}, Migrator, MigratorTrait};
 use std::sync::Arc;
 
-use crate::shared::App;
+use crate::webapp::App;
 
 use domains::{
     campaigns::model::{
@@ -87,8 +96,8 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
     //
     // This combines the session layer with our backend to establish the auth
     // service which will provide the auth session as a request extension.
-    let backend = Backend::new(ctx.db.clone(), ctx.config.oauth.clone())?;
-    let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
+    // let backend = Backend::new(ctx.db.clone(), ctx.config.oauth.clone())?;
+    // let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
 
     // Language list
@@ -101,10 +110,8 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
 
     let app = Router::new()
             .serve_dioxus_application(ServeConfig::builder().build(), || VirtualDom::new(App)).await
-            .merge(account::router())
             // .route_layer(login_required!(Backend, login_url = "/login"))
-            .merge(auth::router(ctx.config.oauth.enabled))
-            // .merge(home::router())
+            // .merge(auth::router(ctx.config.oauth.enabled))
             .merge(health::router())
             .merge(assets::router())
             // .layer(auth_layer)
@@ -116,7 +123,7 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
                         .level(Level::DEBUG)))
             .layer(Extension(ctx.config))
             .layer(Extension(ctx))
-            .layer(middleware::from_fn_with_state(supported_languages.clone(), crate::middleware::i10n::extract_preferred_language));
+            .layer(middleware::from_fn_with_state(supported_languages.clone(), i10n::extract_preferred_language));
 
     
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

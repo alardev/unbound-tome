@@ -13,10 +13,10 @@
   <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="UTF-8" />
-  {style_include}
+  <link rel="stylesheet" type="text/css" href="/static/tailwind.css" />
 </head>
-<body>
-  <div id="main"></div>
+<body class="h-dvh flex">
+  <div id="main" class="flex flex-col grow"></div>
   <script type="module">
     import init from "/{base_path}/assets/dioxus/{app_name}.js";
     init("/{base_path}/assets/dioxus/{app_name}_bg.wasm").then(wasm => {
