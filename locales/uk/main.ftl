@@ -1,5 +1,5 @@
 hello-world = Привіт, світе!
-case-lol = {$case ->
+case-foo = {$case ->
    *[nominative] !
     [genitive] а!
     [vocative] е!

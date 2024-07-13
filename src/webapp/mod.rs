@@ -3,6 +3,9 @@
 
 pub mod pages;
 pub mod components;
+pub mod service;
+pub mod state;
+pub mod model;
 
 use dioxus::prelude::*;
 use pages::{
@@ -13,7 +16,9 @@ use pages::{
 };
 
 use components::shell::{ContentWrapper, HeaderFooter};
+use state::AppState;
 
+pub static APP_STATE: GlobalSignal<AppState> = Signal::global(AppState::default);
 
 #[derive(Routable, Clone, Debug, PartialEq)]
 #[rustfmt::skip]

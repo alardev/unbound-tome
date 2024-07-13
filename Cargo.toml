@@ -15,12 +15,15 @@ members = [".", "domains", "migration", "utils"]
 serde = { version = "1.0.204", features = ["derive"] }
 dioxus = { version = "0.5.1", features = ["fullstack", "router", "html"] }
 dioxus-fullstack = { version = "*", optional = true }
+dioxus-std = { version = "0.5.*", features = ["i18n"], optional = true }
+dioxus-free-icons = { version = "0.8.6", features = ["font-awesome-regular", "material-design-icons-action", "material-design-icons-social", "material-design-icons-navigation", "material-design-icons-file", "material-design-icons-editor", "material-design-icons-content"] }
 axum = { version = "0.7.5", features = ["macros", "tracing"], optional = true }
 tokio = { version = "1.38.0", features = ["full"], optional = true }
 axum-login = { version = "0.15", optional = true }
 axum-extra = { version = "0.9.3", features = ["typed-header"], optional = true }
 axum-htmx = {  version = "0.6.0", features = ["serde", "tower", "guards"], optional = true }
 miette = { version = "7.2.0", features = ["fancy", "serde"], optional = true }
+validator = { version = "0.18.1", features = ["derive"], optional = true }
 
 # tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 async-trait = { version = "0.1.80", optional = true }
@@ -47,6 +50,8 @@ fluent-templates = { version = "0.9", optional = true }
 fluent-bundle = { version = "*", optional = true }
 chrono = { version = "0.4", optional = true }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"], optional = true}
+
+
 
 unbound-tome-utils = { path = "utils", optional = true }
 unbound-tome-domains = { path = "domains", optional = true }
@@ -97,5 +102,6 @@ server = [
     "serde_json",
     "once_cell",
     "thiserror",
-    "tracing-subscriber"
+    "tracing-subscriber",
+    "validator"
     ]
