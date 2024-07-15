@@ -6,7 +6,7 @@ pub mod middlewares;
 use dioxus::prelude::*;
 use dioxus_fullstack::prelude::*;
 
-use axum::{ middleware, Extension, Router};
+use axum::{ middleware, Extension, Router, async_trait, extract::{FromRef, FromRequestParts}};
 use axum_login::{
     login_required, tower_sessions::{cookie::SameSite, Expiry, MemoryStore, SessionManagerLayer}, tracing::{self, Level}, AuthManagerLayerBuilder
 };
@@ -16,7 +16,9 @@ use tower_http::trace::{self, TraceLayer};
 use unbound_tome_utils::config::Config;
 use unic_langid::LanguageIdentifier;
 
-// use middleware::auth::Backend;
+use http::{request::Parts, StatusCode};
+
+use middlewares::auth::Backend;
 
 use routers::{
     assets, 
@@ -81,6 +83,22 @@ impl Context {
     }
 }
 
+#[derive(Clone)]
+pub struct ServerState(pub std::sync::Arc<Context>);
+
+#[async_trait]
+impl<S> FromRequestParts<S> for ServerState
+where
+    Self: FromRef<S>,
+    S: Send + Sync,
+{
+    type Rejection = (StatusCode, String);
+
+    async fn from_request_parts(_parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Ok(Self::from_ref(state))
+    }
+}
+
 pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> {
     // Session layer.
     //
@@ -96,10 +114,10 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
     //
     // This combines the session layer with our backend to establish the auth
     // service which will provide the auth session as a request extension.
-    // let backend = Backend::new(ctx.db.clone(), ctx.config.oauth.clone())?;
-    // let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
+    let backend = Backend::new(ctx.db.clone(), ctx.config.oauth.clone())?;
+    let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
-
+    let state = ServerState(ctx.clone());
     // Language list
     //
     let supported_languages = Arc::new(ctx.config.locale.supported_languages
@@ -114,7 +132,7 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
             // .merge(auth::router(ctx.config.oauth.enabled))
             .merge(health::router())
             .merge(assets::router())
-            // .layer(auth_layer)
+            .layer(auth_layer)
             .layer(
                 TraceLayer::new_for_http()
                     .make_span_with(trace::DefaultMakeSpan::new()
@@ -123,6 +141,7 @@ pub async fn serve(ctx: Arc<Context>) -> Result<(), Box<dyn std::error::Error>> 
                         .level(Level::DEBUG)))
             .layer(Extension(ctx.config))
             .layer(Extension(ctx))
+            .layer(Extension(state))
             .layer(middleware::from_fn_with_state(supported_languages.clone(), i10n::extract_preferred_language));
 
     

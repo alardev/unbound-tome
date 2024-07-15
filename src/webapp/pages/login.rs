@@ -42,22 +42,22 @@ pub fn Login() -> Element {
         spawn(async move {
             let app_state = APP_STATE.read();
 
-            match sign_in(
-                    credentials_submit.get_string("email").to_lowercase(),
+            sign_in(
+                    credentials_submit.get_string("email"),
                     credentials_submit.get_string("password"),
                 )
-                .await
-            {
-                Ok(auth_model) => app_state.auth.signal().set(auth_model),
-                Err(e) => tracing::info!("password length invalid!"),
-            }
-            is_busy.set(false);
+                .await;
+            // {
+            //     Ok(auth_model) => app_state.auth.signal().set(auth_model),
+            //     Err(e) => tracing::info!("password length invalid!"),
+            // }
+            // is_busy.set(false);
         });
     };
 
     rsx! {
         div {
-            class: "min-h-full relative flex flex-col justify-center h-screen overflow-hidden",
+            class: "min-h-full relative flex flex-col justify-center overflow-hidden",
             div { class: "grow flex justify-center self-center z-10",
                 div { class: "w-full p-6 m-auto bg-base-100 rounded-md shadow-md lg:max-w-lg",
                     div { class: "mb-2",
@@ -154,11 +154,15 @@ async fn get_server_data() -> Result<String, ServerFnError> {
 pub async fn sign_in(
     username: String,
     password: String,
-) -> Result<AuthModel, ServerFnError> {
+) -> Result<(), ServerFnError> {
     println!("Server received: {} {}", username, password);
 
+    let auth: crate::server::middlewares::auth::Session = extract().await.unwrap();
 
+    //іnsert input validation here
 
-    Ok(AuthModel { id: "foo".to_string(), roles: vec!["foo".to_string()], groups: vec!["foo".to_string()], permissions: vec!["foo".to_string()] })
+    let stuff = crate::server::routers::auth::login_password(auth, username, password).await;
+    println!("Login response: {}", stuff.status());
+    Ok(())
 }
 

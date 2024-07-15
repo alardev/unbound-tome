@@ -1,5 +1,6 @@
 use migration::sea_orm::{ColumnTrait, ActiveModelTrait, Set};
 use async_trait::async_trait;
+use axum::response::{IntoResponse, Response};
 use axum::http::header::{AUTHORIZATION, USER_AGENT};
 use axum_login::{tracing::{error, info}, AuthnBackend, UserId};
 use domains::users::{self, model::Entity as User};
@@ -240,6 +241,63 @@ impl AuthnBackend for Backend {
 // We use a type alias for convenience.
 //
 // Note that we've supplied our concrete backend here.
-pub type AuthSession = axum_login::AuthSession<Backend>;
+// pub type AuthSession = axum_login::AuthSession<Backend>;
 
+pub struct Session(
+    pub axum_login::AuthSession<Backend>,
+);
 
+impl std::ops::Deref for Session {
+    type Target = axum_login::AuthSession<Backend>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for Session {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Debug)]
+pub struct AuthSessionLayerNotFound;
+
+impl std::fmt::Display for AuthSessionLayerNotFound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "AuthSessionLayer was not found")
+    }
+}
+
+impl std::error::Error for AuthSessionLayerNotFound {}
+
+impl IntoResponse for AuthSessionLayerNotFound {
+    fn into_response(self) -> Response {
+        (
+            http::status::StatusCode::INTERNAL_SERVER_ERROR,
+            "AuthSessionLayer was not found",
+        )
+            .into_response()
+    }
+}
+
+#[async_trait]
+impl<S> axum::extract::FromRequestParts<S> for Session
+where
+    S: std::marker::Sync + std::marker::Send,
+{
+    type Rejection = AuthSessionLayerNotFound;
+
+    async fn from_request_parts(parts: &mut http::request::Parts, state: &S) -> Result<Self, Self::Rejection> {
+        //
+        axum_login::AuthSession::from_request_parts(parts, state)
+            .await
+            .map(|auth_session| {
+                // let ss = parts.extensions.get::<ServerState>().unwrap();
+                // let dbp = ss.0.clone();
+                Session(auth_session)
+            })
+            .map_err(|_| AuthSessionLayerNotFound)
+    }
+}
