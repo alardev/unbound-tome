@@ -47,32 +47,32 @@ pub async fn login_password(
         .await
     {
         Ok(Some(user)) => user,
-        Ok(None) => return "Invalid credentials".to_string().into_response(),
+        Ok(None) => 
+            return (
+                StatusCode::UNAUTHORIZED,
+                "Invalid credentials",
+            ).into_response(),
         Err(_) => {
-            let mut response = "Something went wrong! Internal Server Error 500!".into_response();
-            return response
+            let mut response = 
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Something went wrong! Internal Server Error 500!",
+            ).into_response();
         },
     };
 
     if auth_session.login(&user).await.is_err() {
-        let mut response = "Something went wrong! Internal Server Error 500!".into_response();
-        return response
+        let mut response = 
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Something went wrong! Internal Server Error 500!",
+        ).into_response();
     }
 
     if let Some(ref next) = creds.next {
-        // Redirect::to(next).into_response()
-        let res = Response::builder()
-            .status(200)
-            .body(Body::empty())
-            .unwrap();
-        return res
+        return Redirect::to(next).into_response()
     } else {
-        // Redirect::to("/").into_response()
-        let res = Response::builder()
-            .status(200)
-            .body(Body::empty())
-            .unwrap();
-        return res
+        return Redirect::to("/").into_response()
     }
 
 }

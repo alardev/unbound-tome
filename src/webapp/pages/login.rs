@@ -1,5 +1,5 @@
-use std::{collections::HashMap, vec};
-
+use std::{collections::HashMap, error, vec};
+use crate::webapp::Route;
 use dioxus::prelude::*;
 
 #[cfg(feature = "server")]
@@ -9,6 +9,7 @@ use crate::webapp::{model::auth_model::AuthModel, service::validator_service::Va
 
 #[component]
 pub fn Login() -> Element {
+    let nav = navigator();
     let mut credentials_submit = use_signal(HashMap::<String, FormValue>::new);
     let mut is_busy = use_signal(|| false);
 
@@ -21,37 +22,23 @@ pub fn Login() -> Element {
     });
 
     let sign_in_task = move |_| {
-        // is_busy.set(true);
-        // if !credentials_submit.is_string_valid("login", 5)
-        //     || !credentials_submit.is_string_valid("password", 6)
-        // {
-        //     is_busy.set(true);
-        //     if !credentials_submit.is_string_valid("login", 5)
-        //         || !credentials_submit.is_string_valid("password", 6)
-        //     {
-        //         APP_STATE
-        //             .peek()
-        //             .modal
-        //             .signal()
-        //             .set(ModalModel::Error(translate!(i18, "errors.fields")));
-        //         is_busy.set(false);
-        //         return;
-        //     }
-        // }
-
         spawn(async move {
             let app_state = APP_STATE.read();
 
-            sign_in(
+            match sign_in(
                     credentials_submit.get_string("email"),
                     credentials_submit.get_string("password"),
                 )
-                .await;
-            // {
-            //     Ok(auth_model) => app_state.auth.signal().set(auth_model),
-            //     Err(e) => tracing::info!("password length invalid!"),
-            // }
-            // is_busy.set(false);
+                .await
+            { //app_state.auth.signal().set(auth_model)
+                Ok(target) => nav.replace(target),
+                Err(e) => {
+                    //display modal
+                    
+                    nav.replace("/auth/login".to_string())
+                }
+            };
+            is_busy.set(false);
         });
     };
 
@@ -154,7 +141,7 @@ async fn get_server_data() -> Result<String, ServerFnError> {
 pub async fn sign_in(
     username: String,
     password: String,
-) -> Result<(), ServerFnError> {
+) -> Result<String, ServerFnError> {
     println!("Server received: {} {}", username, password);
 
     let auth: crate::server::middlewares::auth::Session = extract().await.unwrap();
@@ -162,7 +149,6 @@ pub async fn sign_in(
     //іnsert input validation here
 
     let stuff = crate::server::routers::auth::login_password(auth, username, password).await;
-    println!("Login response: {}", stuff.status());
-    Ok(())
+    Ok(stuff.headers()["Location"].to_str().unwrap_or("shit").to_string())
 }
 
