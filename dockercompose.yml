@@ -10,6 +10,17 @@ services:
       - pgdata:/var/lib/postgresql/data 
     ports:
       - 5432:5432
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: surrealdb
+    ports:
+      - '8000:8000'
+    command:
+      - start #start the SurrealDB server
+      - --log=trace #no idea what this does :(
+      - --user=root #default user
+      - --pass=root #default password
+    restart: always
  
 
 volumes:
